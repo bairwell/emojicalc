@@ -23,7 +23,7 @@ Non-Vagrant startup
 ===================
 Just download the files onto your machine (which already has) and run a command such as:
 ```
-php -S localhost:8000 -t emojicalc/public/
+php -S localhost:8000 -t emojicalc/public/index.php
 ```
 to launch the PHP inbuilt web server on the localhost only on port 8000 and serve the
 files within the public/ folder.

@@ -21,7 +21,7 @@ Vagrant.configure("2") do |config|
   # start PHP's inbuilt webserver
   config.vm.provision "shell", run: "always", :args => [listening_port], inline: <<-SHELL
      service nginx stop
-     nohup php -S 0.0.0.0:$1 -t /vagrant/public/ &
+     nohup php -S 0.0.0.0:$1 /vagrant/public/index.php &
      echo "Ready - access http://localhost:$1/ to preview"
   SHELL
 
