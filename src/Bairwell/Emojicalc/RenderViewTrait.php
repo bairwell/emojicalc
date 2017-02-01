@@ -1,5 +1,6 @@
 <?php
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace Bairwell\Emojicalc;
 
 /**
@@ -9,32 +10,36 @@ namespace Bairwell\Emojicalc;
  *
  * @package Bairwell\Emojicalc
  */
-trait RenderViewTrait {
+trait RenderViewTrait
+{
 
+    /**
+     * Holds the cached templates.
+     * @var array
+     */
     private $cachedTemplates;
 
     /**
      * Renders a view file.
      *
-     * @param string $fileName   File name to render.
-     * @param array  $parameters Template parameters to substitute in.
+     * @param string $fileName File name to render.
+     * @param array $parameters Template parameters to substitute in.
      *
      * @return string
      *
-     * @throws \Exception If file does not exist.
+     * @throws \InvalidArgumentException If file does not exist.
      */
-    protected function renderView(string $fileName, array $parameters = []) : string
+    protected function renderView(string $fileName, array $parameters = []): string
     {
-        $fileName=__DIR__.DIRECTORY_SEPARATOR.'Views'.DIRECTORY_SEPARATOR.$fileName.'.html';
-        $real=realpath($fileName);
-        if (false===$real) {
-            throw new \Exception('File '.$fileName.' does not exist');
+        $fileName = __DIR__ . DIRECTORY_SEPARATOR . 'Views' . DIRECTORY_SEPARATOR . $fileName . '.html';
+        $real = realpath($fileName);
+        if (false === $real) {
+            throw new \InvalidArgumentException('File ' . $fileName . ' does not exist');
         }
-        if (false===isset($this->cachedTemplates[$real])) {
-            $this->cachedTemplates[$real]=file_get_contents($real);
+        if (false === isset($this->cachedTemplates[$real])) {
+            $this->cachedTemplates[$real] = file_get_contents($real);
         }
-        $page = strtr($this->cachedTemplates[$real], $parameters);
+        return strtr($this->cachedTemplates[$real], $parameters);
 
-        return $page;
-    }//end renderView()
+    }
 }

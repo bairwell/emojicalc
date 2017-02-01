@@ -1,5 +1,5 @@
 <?php
-declare (strict_types = 1);
+declare (strict_types=1);
 
 namespace Bairwell\Emojicalc;
 
@@ -36,7 +36,8 @@ class Request
      *
      * @return array
      */
-    public function getParsedBody() : array  {
+    public function getParsedBody(): array
+    {
         return $this->postData;
     }
 
@@ -45,25 +46,30 @@ class Request
      * @param array $data The input data.
      * @return Request Self to be fluent.
      */
-    public function withParsedBody(array $data) : self {
-        $this->postData=$data;
+    public function withParsedBody(array $data): self
+    {
+        $this->postData = $data;
         return $this;
     }
+
     /**
      * Return an instance with the specified query string parameters.
      *
      * @param array $query
      * @return Request
      */
-    public function withQueryParams(array $query) : self {
-        $this->queryParameters=$query;
+    public function withQueryParams(array $query): self
+    {
+        $this->queryParameters = $query;
         return $this;
     }
+
     /**
      * Get the query string parameters.
      * @return array
      */
-    public function getQueryParams() : array {
+    public function getQueryParams(): array
+    {
         return $this->queryParameters;
     }
 

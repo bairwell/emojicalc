@@ -1,12 +1,14 @@
 <?php
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace Bairwell\Emojicalc;
 
 /**
  * A very basic router.
  * @package Bairwell\Emojicalc
  */
-class Router {
+class Router
+{
     use RenderViewTrait;
 
     /**
@@ -20,7 +22,7 @@ class Router {
      * Our list of known routes.
      * @var array
      */
-    protected $routes=[];
+    protected $routes = [];
 
     /**
      * Router constructor.
@@ -43,27 +45,28 @@ class Router {
      * @param string $route The URL we we be matching against.
      * @param callable $callable The callable route.
      */
-    public function registerRoute(string $method,string $route,callable $callable) {
-        $method=strtoupper($method);
-        $this->routes[$method][$route]=$callable;
+    public function registerRoute(string $method, string $route, callable $callable)
+    {
+        $method = strtoupper($method);
+        $this->routes[$method][$route] = $callable;
     }
 
-    public function run() {
-        $request=new Request();
-        $request->method=strtoupper($this->environment['REQUEST_METHOD'] ?? '[Unknown]');
+    public function run()
+    {
+        $request = new Request();
+        $request->method = strtoupper($this->environment['REQUEST_METHOD'] ?? '[Unknown]');
         $request->withParsedBody($_POST);
         $request->withQueryParams($_GET);
+        $requestUri = '';
         if (true === isset($this->environment['REQUEST_URI'])) {
             $requestUri = parse_url($this->environment['REQUEST_URI'], PHP_URL_PATH);
-        } else {
-            $requestUri='';
         }
         $requestUri = trim($requestUri, '/');
+        $found = false;
+        $matches = [];
         // now to match the routes
-        if (true===array_key_exists($request->method,$this->routes)) {
+        if (true === array_key_exists($request->method, $this->routes)) {
             $keys = array_keys($this->routes[$request->method]);
-            $found = false;
-            $matches = [];
             foreach ($keys as $routePath) {
                 if (1 === preg_match($routePath, $requestUri, $matches)) {
                     $found = $routePath;
@@ -72,7 +75,7 @@ class Router {
             }
         }
 
-        $request->url            = $requestUri;
+        $request->url = $requestUri;
         $request->pathParameters = $matches;
         // now to run it if we found it.
         // we do this in a try/catch block as other exceptions may be raised.
@@ -97,19 +100,18 @@ class Router {
      * @param Request $request The input request item in case data is needed.
      * @param callable $route The route we are running.
      */
-    protected function runFoundRoute(Request $request,callable $route) {
-        $response=new Response();
+    protected function runFoundRoute(Request $request, callable $route)
+    {
+        $response = new Response();
         // ensure all output is captured.
         ob_start();
-        // PHPStorm suggests $route($request,$response), but I prefer using call_user_func
-        // as I find it a bit clear.
-        call_user_func($route, $request, $response);
+        $route($request, $response);
         // append any outputted text to the body "just in case"
         $response->addToBody(ob_get_contents());
         ob_end_clean();
-        header('Content-type: '.$response->getContentType(), true);
+        header('Content-type: ' . $response->getContentType(), true);
         // if it is html, then render it in the template
-        if (0===strpos($response->getContentType(),'text/html')) {
+        if (0 === strpos($response->getContentType(), 'text/html')) {
             $templateParameters = ['%BODY%' => $response->getBody()];
             $page = $this->renderView('template', $templateParameters);
             echo $page;

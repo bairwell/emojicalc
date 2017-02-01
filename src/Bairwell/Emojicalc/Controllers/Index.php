@@ -68,10 +68,10 @@ class Index
      * @return string The rendered start page.
      * @throws \Exception If the views do not exist.
      */
-    private function renderShowEntry(array $placeholders=[]) : string {
-        $placeholders=$this->getShowEntryPlaceholders($placeholders);
-        $rendered=$this->renderView('showEntry', $placeholders);
-        return $rendered;
+    private function renderShowEntry(array $placeholders = []): string
+    {
+        $placeholders = $this->getShowEntryPlaceholders($placeholders);
+        return $this->renderView('showEntry', $placeholders);
     }
 
     /**
@@ -80,7 +80,8 @@ class Index
      * @return array Populated placeholders array.
      * @throws \Exception If the views do not exist.
      */
-    private function getShowEntryPlaceholders(array $placeholders=[]) : array {
+    private function getShowEntryPlaceholders(array $placeholders = []): array
+    {
         // set a sensible default for the placeholders
         $defaults = [
             '%ERRORS%' => '',
@@ -92,10 +93,9 @@ class Index
         $htmlOperators = '';
         /* @var \Bairwell\Emojicalc\Entities\Operator $currentOperator */
         foreach ($this->operators as $currentOperator) {
+            $selected = '';
             if ($currentOperator->getSymbol()->getSymbolCode() === $placeholders['%OPERATOR%']) {
                 $selected = 'selected=\'selected\'';
-            } else {
-                $selected = '';
             }
             $htmlOperators .= $this->renderView('operatorOption',
                 [
@@ -120,6 +120,10 @@ class Index
         $query = $request->getParsedBody();
         $placeholders = [];
         $errors = [];
+        // set some defaults "just in case"
+        $first = 0;
+        $second = 0;
+        $operator = null;
         // check the first digit
         if (false === array_key_exists('first', $query)) {
             $errors[] = 'Missing first number';
@@ -163,9 +167,9 @@ class Index
         }
 
         // do the calculation
-        $placeholders['%SHOWENTRY%']=$this->renderShowEntry($placeholders);
+        $placeholders['%SHOWENTRY%'] = $this->renderShowEntry($placeholders);
         $placeholders['%RESULT%'] = (string)$operator->performCalculation($first, $second);
-        $rendered=$this->renderView('results', $placeholders);
+        $rendered = $this->renderView('results', $placeholders);
         $response->addToBody($rendered);
     }
 }

@@ -37,17 +37,19 @@ class Symbol
      * @param string $symbolName Name of the symbol (such as "alien").
      * @param string $symbolImage Additional URL for the graphic for the symbol.
      */
-    public function __construct(string $symbolCode,string $symbolName='',string $symbolImage='') {
-        $this->symbolCode=$symbolCode;
-        $this->symbolName=$symbolName;
-        $this->symbolImage;
+    public function __construct(string $symbolCode, string $symbolName = '', string $symbolImage = '')
+    {
+        $this->symbolCode = $symbolCode;
+        $this->symbolName = $symbolName;
+        $this->symbolImage = $symbolImage;
     }
 
     /**
      * Get this symbol code.
      * @return string
      */
-    public function getSymbolCode() {
+    public function getSymbolCode()
+    {
         return $this->symbolCode;
     }
 }

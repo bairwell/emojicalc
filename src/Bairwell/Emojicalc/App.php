@@ -41,22 +41,11 @@ class App
     }
 
     /**
-     * Run the application (after registering routes)
-     */
-    public function run() {
-        // should really use dependency injection/containers here.
-        $indexController=new Index($this->configuration['operators']);
-        $this->router->registerRoute('GET','/^\/?$/', [$indexController, 'startAction']);
-        $this->router->registerRoute('POST','/^\/?$/', [$indexController, 'calculateAction']);
-        $this->router->run();
-    }
-
-    /**
      * Build the basic configuration taking into account any default settings.
      *
      * @param array $configuration Configuration to use as user-defined.
      * @return array
-     * @throws \Exception If the list of operators is not an Operator instance.
+     * @throws \InvalidArgumentException If the list of operators is not an Operator instance.
      */
     protected function buildConfiguration(array $configuration): array
     {
@@ -67,16 +56,16 @@ class App
         if (false === isset($configuration['operators'])) {
             $configuration['operators'] = $this->buildDefaultOperators();
         }
-        if (false===($configuration['operators'] instanceof Operators)) {
-            throw new \Exception('Invalid operators');
+        if (false === ($configuration['operators'] instanceof Operators)) {
+            throw new \InvalidArgumentException('Invalid operators');
         }
-        $configuration = array_merge($defaultConfiguration, $configuration);
-        return $configuration;
+        return array_merge($defaultConfiguration, $configuration);
     }
 
     /**
      * Build the list of default operators.
      * @return Operators
+     * @throws \InvalidArgumentException If it isn't a recognised operator type being passed in.
      */
     protected function buildDefaultOperators(): Operators
     {
@@ -85,8 +74,20 @@ class App
             ->addOperator(new Operator('-', new Symbol("\u{1f480}", 'Skull')))
             ->addOperator(new Operator('*', new Symbol("\u{1f47b}", 'Ghost')))
             ->addOperator(new Operator('/', new Symbol("\u{1f631}", 'Scream'))
-        );
+            );
         return $operators;
+    }
+
+    /**
+     * Run the application (after registering routes)
+     */
+    public function run()
+    {
+        // should really use dependency injection/containers here.
+        $indexController = new Index($this->configuration['operators']);
+        $this->router->registerRoute('GET', '/^\/?$/', [$indexController, 'startAction']);
+        $this->router->registerRoute('POST', '/^\/?$/', [$indexController, 'calculateAction']);
+        $this->router->run();
     }
 
 }

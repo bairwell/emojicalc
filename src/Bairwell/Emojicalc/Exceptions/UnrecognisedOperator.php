@@ -10,6 +10,7 @@ namespace Bairwell\Emojicalc\Exceptions;
  *
  * @package Bairwell\Emojicalc\Exceptions
  */
-class UnrecognisedOperator extends \InvalidArgumentException {
+class UnrecognisedOperator extends \InvalidArgumentException
+{
 
 }

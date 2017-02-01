@@ -2,7 +2,7 @@
 /**
  * Index file.
  */
-declare(strict_types=1);
+declare(strict_types = 1);
 
 if ('cli-server' === PHP_SAPI) {
     // To help the built-in PHP dev server, check if the request was actually for

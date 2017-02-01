@@ -13,12 +13,13 @@ use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
  *
  * @package Bairwell\Emojicalc\Entities
  */
-class Operators implements \Iterator {
+class Operators implements \Iterator
+{
     /**
      * Our list of operators.
      * @var array
      */
-    private $operators=[];
+    private $operators = [];
 
     /**
      * Current iterator position.
@@ -29,8 +30,9 @@ class Operators implements \Iterator {
     /**
      * Operators constructor.
      */
-    public function __construct() {
-        $this->position=0;
+    public function __construct()
+    {
+        $this->position = 0;
     }
 
     /**
@@ -43,8 +45,9 @@ class Operators implements \Iterator {
      * @param Operator $operator Operator to add.
      * @return $this Fluent interface.
      */
-    public function addOperator(Operator $operator) {
-        $this->operators[]=$operator;
+    public function addOperator(Operator $operator)
+    {
+        $this->operators[] = $operator;
         return $this;
     }
 
@@ -54,30 +57,34 @@ class Operators implements \Iterator {
      * @return Operator The matched operator.
      * @throws \Exception If not found.
      */
-    public function findOperatorByType(string $type) : Operator {
+    public function findOperatorByType(string $type): Operator
+    {
         /* @var Operator $currentOperator */
         foreach ($this->operators as $currentOperator) {
-            if ($currentOperator->getOperatorType()===$type) {
+            if ($currentOperator->getOperatorType() === $type) {
                 return $currentOperator;
             }
         }
         throw new UnrecognisedOperator($type);
     }
+
     /**
      * Find an operator by symbol code (i.e. the \u234)
      * @param string $symbolCode The symbol code to match.
      * @return Operator The matched operator.
      * @throws \Exception If not found.
      */
-    public function findOperatorBySymbol(string $symbolCode) : Operator {
+    public function findOperatorBySymbol(string $symbolCode): Operator
+    {
         /* @var Operator $currentOperator */
         foreach ($this->operators as $currentOperator) {
-            if ($currentOperator->getSymbol()->getSymbolCode()===$symbolCode) {
+            if ($currentOperator->getSymbol()->getSymbolCode() === $symbolCode) {
                 return $currentOperator;
             }
         }
         throw new UnrecognisedOperator($symbolCode);
     }
+
     /**
      * Return the current element
      * @link http://php.net/manual/en/iterator.current.php
