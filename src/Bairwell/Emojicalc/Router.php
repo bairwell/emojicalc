@@ -39,11 +39,13 @@ class Router {
     /**
      * Register a route.
      *
+     * @param string $method The method we will be matching against.
      * @param string $route The URL we we be matching against.
      * @param callable $callable The callable route.
      */
-    public function registerRoute(string $route,callable $callable) {
-        $this->routes[$route]=$callable;
+    public function registerRoute(string $method,string $route,callable $callable) {
+        $method=strtoupper($method);
+        $this->routes[$method][$route]=$callable;
     }
 
     public function run() {
@@ -58,13 +60,15 @@ class Router {
         }
         $requestUri = trim($requestUri, '/');
         // now to match the routes
-        $keys    = array_keys($this->routes);
-        $found   = false;
-        $matches = [];
-        foreach ($keys as $routePath) {
-            if (1 === preg_match($routePath, $requestUri, $matches)) {
-                $found = $routePath;
-                break;
+        if (true===array_key_exists($request->method,$this->routes)) {
+            $keys = array_keys($this->routes[$request->method]);
+            $found = false;
+            $matches = [];
+            foreach ($keys as $routePath) {
+                if (1 === preg_match($routePath, $requestUri, $matches)) {
+                    $found = $routePath;
+                    break;
+                }
             }
         }
 
@@ -74,7 +78,7 @@ class Router {
         // we do this in a try/catch block as other exceptions may be raised.
         try {
             if (false !== $found) {
-                $this->runFoundRoute($request, $this->routes[$found]);
+                $this->runFoundRoute($request, $this->routes[$request->method][$found]);
             } else {
                 header('HTTP/1.1 404 Not Found');
                 $page = $this->renderView('404notFound');

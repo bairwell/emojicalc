@@ -53,4 +53,8 @@ class Index
         }
         $response->addToBody($this->renderView('showEntry',['%OPERATORS%'=>$htmlOperators]));
     }
+
+    public function calculateAction(Request $request,Response $response) {
+        $response->addToBody('Showing');
+    }
 }

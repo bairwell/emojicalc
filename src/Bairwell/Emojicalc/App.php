@@ -46,7 +46,8 @@ class App
     public function run() {
         // should really use dependency injection/containers here.
         $indexController=new Index($this->configuration['operators']);
-        $this->router->registerRoute('/^\/?$/', [$indexController, 'startAction']);
+        $this->router->registerRoute('GET','/^\/?$/', [$indexController, 'startAction']);
+        $this->router->registerRoute('POST','/^\/?$/', [$indexController, 'calculateAction']);
         $this->router->run();
     }
 
