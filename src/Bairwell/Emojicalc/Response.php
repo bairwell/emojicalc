@@ -21,6 +21,10 @@ class Response {
      */
     public $contentType;
 
+    /**
+     * Response constructor.
+     * @param string $contentType The content type we are returning.
+     */
     public function __construct(string $contentType='text/html;charset=utf-8') {
         $this->body='';
         $this->setContentType($contentType);

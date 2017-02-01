@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Bairwell\Emojicalc\Controllers;
 
 use Bairwell\Emojicalc\Entities\Operators;
+use Bairwell\Emojicalc\RenderViewTrait;
 use Bairwell\Emojicalc\Request;
 use Bairwell\Emojicalc\Response;
 
@@ -16,6 +17,8 @@ use Bairwell\Emojicalc\Response;
  */
 class Index
 {
+
+    use RenderViewTrait;
 
     /**
      * List of all valid operators.
@@ -35,20 +38,19 @@ class Index
      *
      * @param Request $request
      * @param Response $response
+     * @throws \Exception If the views do not exist.
      */
     public function startAction(Request $request,Response $response) {
-        $response->addToBody('<select>');
+        $htmlOperators='';
         /* @var \Bairwell\Emojicalc\Entities\Operator $currentOperator */
         foreach ($this->operators as $currentOperator) {
-            $response->addToBody(
-                '<option value="'.
-                $currentOperator->getOperatorType().
-                '">'.
-                $currentOperator->getSymbol()->getSymbolCode().
-            '</option>'
-        );
+            $htmlOperators .= $this->renderView('operatorOption',
+                [
+                    '%OPERATORTYPE%' => $currentOperator->getOperatorType(),
+                    '%SYMBOL%' => $currentOperator->getSymbol()->getSymbolCode()
+                ]
+            );
         }
-        $response->addToBody('</select>');
-        $response->addToBody('Hello this is a test');
+        $response->addToBody($this->renderView('showEntry',['%OPERATORS%'=>$htmlOperators]));
     }
 }

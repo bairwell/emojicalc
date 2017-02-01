@@ -7,6 +7,8 @@ namespace Bairwell\Emojicalc;
  * @package Bairwell\Emojicalc
  */
 class Router {
+    use RenderViewTrait;
+
     /**
      * The environment details.
      *
@@ -51,6 +53,8 @@ class Router {
         $request->queryParameters=$_GET;
         if (true === isset($this->environment['REQUEST_URI'])) {
             $requestUri = parse_url($this->environment['REQUEST_URI'], PHP_URL_PATH);
+        } else {
+            $requestUri='';
         }
         $requestUri = trim($requestUri, '/');
         // now to match the routes
@@ -110,21 +114,5 @@ class Router {
             echo $response->getBody();
         }
     }
-
-    /**
-     * Renders a view file.
-     *
-     * @param string $fileName   File name to render.
-     * @param array  $parameters Template parameters to substitute in.
-     *
-     * @return string
-     */
-    protected function renderView(string $fileName, array $parameters = []) : string
-    {
-        $page = file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'Views'.DIRECTORY_SEPARATOR.$fileName.'.html');
-        $page = strtr($page, $parameters);
-
-        return $page;
-    }//end renderView()
 
 }
