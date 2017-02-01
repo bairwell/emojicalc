@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Bairwell\Emojicalc\Entities;
 
+use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
+
 /**
  * Class Operator
  *
@@ -76,5 +78,40 @@ class Operator
      */
     public function getOperatorType() : string {
         return $this->operatorType;
+    }
+
+    /**
+     * Get the name of this operator.
+     *
+     * @return string
+     */
+    public function getOperatorName() : string {
+        return $this->allowedOperators[$this->operatorType];
+    }
+
+    /**
+     * Actually perform the calculation.
+     * @param float $first The first number.
+     * @param float $second The second number.
+     * @return float Return value.
+     */
+    public function performCalculation(float $first,float $second) : float {
+        switch ($this->operatorType) {
+            case '+':
+                return $first+$second;
+                break;
+            case '-':
+                return $first-$second;
+                break;
+            case '/':
+                return $first/$second;
+                break;
+            case '*':
+                return $first*$second;
+                break;
+            default:
+                // If not recognised, throw.
+                throw new UnrecognisedOperator('During calculation');
+        }
     }
 }

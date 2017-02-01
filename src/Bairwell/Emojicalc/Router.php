@@ -51,8 +51,8 @@ class Router {
     public function run() {
         $request=new Request();
         $request->method=strtoupper($this->environment['REQUEST_METHOD'] ?? '[Unknown]');
-        $request->postData=$_POST;
-        $request->queryParameters=$_GET;
+        $request->withParsedBody($_POST);
+        $request->withQueryParams($_GET);
         if (true === isset($this->environment['REQUEST_URI'])) {
             $requestUri = parse_url($this->environment['REQUEST_URI'], PHP_URL_PATH);
         } else {

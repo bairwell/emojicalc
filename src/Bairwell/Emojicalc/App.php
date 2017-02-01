@@ -70,7 +70,7 @@ class App
         if (false===($configuration['operators'] instanceof Operators)) {
             throw new \Exception('Invalid operators');
         }
-        $configuration = array_merge($configuration, $defaultConfiguration);
+        $configuration = array_merge($defaultConfiguration, $configuration);
         return $configuration;
     }
 

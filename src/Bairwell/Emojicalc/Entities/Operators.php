@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Bairwell\Emojicalc\Entities;
 
+use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
+
 /**
  * Class Operators.
  *
@@ -34,6 +36,10 @@ class Operators implements \Iterator {
     /**
      * Add a single operator.
      *
+     * Currently allows multiple operators with the same operator and/or same symbol.
+     *
+     * @TODO Add duplicate checking.
+     *
      * @param Operator $operator Operator to add.
      * @return $this Fluent interface.
      */
@@ -42,6 +48,36 @@ class Operators implements \Iterator {
         return $this;
     }
 
+    /**
+     * Find an operator by type (i.e. the +/- symbols)
+     * @param string $type The operator type to match.
+     * @return Operator The matched operator.
+     * @throws \Exception If not found.
+     */
+    public function findOperatorByType(string $type) : Operator {
+        /* @var Operator $currentOperator */
+        foreach ($this->operators as $currentOperator) {
+            if ($currentOperator->getOperatorType()===$type) {
+                return $currentOperator;
+            }
+        }
+        throw new UnrecognisedOperator($type);
+    }
+    /**
+     * Find an operator by symbol code (i.e. the \u234)
+     * @param string $symbolCode The symbol code to match.
+     * @return Operator The matched operator.
+     * @throws \Exception If not found.
+     */
+    public function findOperatorBySymbol(string $symbolCode) : Operator {
+        /* @var Operator $currentOperator */
+        foreach ($this->operators as $currentOperator) {
+            if ($currentOperator->getSymbol()->getSymbolCode()===$symbolCode) {
+                return $currentOperator;
+            }
+        }
+        throw new UnrecognisedOperator($symbolCode);
+    }
     /**
      * Return the current element
      * @link http://php.net/manual/en/iterator.current.php
