@@ -4,6 +4,8 @@
  */
 declare(strict_types = 1);
 
+error_reporting(-1);
+
 if ('cli-server' === PHP_SAPI) {
     // To help the built-in PHP dev server, check if the request was actually for
     // something which should probably be served as a static file

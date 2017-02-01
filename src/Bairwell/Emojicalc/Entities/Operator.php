@@ -100,6 +100,7 @@ class Operator
      * @param float $first The first number.
      * @param float $second The second number.
      * @return float Return value.
+     * @throws UnrecognisedOperator If the operator is not actually matched.
      */
     public function performCalculation(float $first, float $second): float
     {

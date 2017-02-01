@@ -7,10 +7,9 @@
     <title>Emojicalculator by Richard Bairwell</title>
     <!-- setup jquery -->
     <script
-            src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
-            integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc="
+            src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
             crossorigin="anonymous"></script>
-
     <!-- setup bootstap -->
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -50,6 +49,48 @@
     </nav>
     %BODY%
 </div>
+<script>
+    jQuery("#entryForm" ).submit(function( event ) {
+        var entryForm=jQuery('#entryForm');
+        var data = {};
+        jQuery.each(this.elements, function(i, v){
+            var input = jQuery(v);
+            data[input.attr("name")] = input.val();
+            delete data["undefined"];
+        });
 
+        jQuery.ajax({
+            url: entryForm.attr('action'),
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json;charset=utf-8',
+            data: JSON.stringify(data),
+            async:false,
+            success: function(data) {
+                var resultField=jQuery('#jQueryResults');
+                var errorField=jQuery('#errors');
+                if (data.hasOwnProperty('result')){
+                    console.log('The result was '+data.result);
+                }
+                if (data.hasOwnProperty('htmlresults')){
+                    resultField.html(data.htmlresults);
+                    resultField.show();
+                } else {
+                    resultField.hide();
+                }
+                if (data.hasOwnProperty('errors')){
+                    errorField.html(data.errors);
+                    errorField.show();
+                } else {
+                    errorField.hide();
+                }
+            },
+            error: function (request, error) {
+                alert('Error when accessing: ' + JSON.stringify(request));
+            }
+        });
+        event.preventDefault();
+    });
+</script>
 </body>
 </html>

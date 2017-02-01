@@ -12,11 +12,22 @@ class Request
 {
 
     /**
+     * Holds the URL.
+     * @var string
+     */
+    public $url='';
+
+    /**
+     * Holds the path parameters.
+     * @var array
+     */
+    public $pathParameters=[];
+    /**
      * Request method.
      *
      * @var string
      */
-    public $method;
+    protected $method='';
     /**
      * Query string parameters.
      *
@@ -31,6 +42,70 @@ class Request
      */
     protected $postData = [];
 
+    /**
+     * Stores if this is a json request or not.
+     * @var bool
+     */
+    protected $isJson=false;
+
+    /**
+     * Stores the content type.
+     * @var string
+     */
+    protected $contentType='text/html';
+
+    /**
+     * Set the content type.
+     * @param string $contentType New content type.
+     * @return Request
+     */
+    public function withContentType(string $contentType) : self {
+        $this->contentType=$contentType;
+        return $this;
+    }
+
+    /**
+     * Get the set content type.
+     * @return string
+     */
+    public function getContentType() : string {
+        return $this->contentType;
+    }
+    /**
+     * Set the status of the is json request flag.
+     * @param bool $isJson Is this a json request or not.
+     * @return Request
+     */
+    public function setJson(bool $isJson) : self {
+        $this->isJson=$isJson;
+        return $this;
+    }
+
+    /**
+     * Is this a JSON request?
+     * @return bool
+     */
+    public function isJson() : bool {
+        return $this->isJson;
+    }
+    /**
+     * Return the request method.
+     * @return string
+     */
+    public function getMethod() : string {
+        return $this->method;
+    }
+
+    /**
+     * Return an instance with the provided HTTP method.
+     *
+     * @param string $method Method to set.
+     * @return Request
+     */
+    public function withMethod(string $method) : self {
+        $this->method=$method;
+        return $this;
+    }
     /**
      * Get the parsed data.
      *

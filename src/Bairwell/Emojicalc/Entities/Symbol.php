@@ -48,8 +48,12 @@ class Symbol
      * Get this symbol code.
      * @return string
      */
-    public function getSymbolCode()
+    public function getSymbolCode() : string
     {
         return $this->symbolCode;
+    }
+
+    public function getSymbolName() : string {
+        return $this->symbolName;
     }
 }

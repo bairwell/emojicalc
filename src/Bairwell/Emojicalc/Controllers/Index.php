@@ -44,10 +44,11 @@ class Index
      * @param Request $request The request object (unused here).
      * @param Response $response The response object for populating.
      * @throws \Exception If the views do not exist.
+     * @return Response For chaining.
      */
-    public function startAction(Request $request, Response $response)
+    public function startAction(Request $request, Response $response) : Response
     {
-        $this->showEntryPage($request, $response);
+        return $this->showEntryPage($request, $response);
     }
 
     /**
@@ -56,10 +57,19 @@ class Index
      * @param Request $request The request object (unused here).
      * @param Response $response The response object for populating.
      * @param array $placeholders Additional placeholders.
+     * @return Response For chaining.
      */
-    private function showEntryPage(Request $request, Response $response, array $placeholders = [])
+    private function showEntryPage(Request $request, Response $response, array $placeholders = []) : Response
     {
-        $response->addToBody($this->renderShowEntry($placeholders));
+        // compose the JSON
+        if (true===$request->isJson()) {
+            $response=new Response('application/json;charset=utf-8');
+            $placeholders=$this->jsonifyPlaceholders($placeholders);
+
+            return $response->addToBody(json_encode($placeholders));
+        } else {
+            return $response->addToBody($this->renderShowEntry($placeholders));
+        }
     }
 
     /**
@@ -112,10 +122,11 @@ class Index
     /**
      * Do the calculations.
      *
-     * @param Request $request
-     * @param Response $response
+     * @param Request $request The inbound request object.
+     * @param Response $response The response object.
+     * @return Response Populated response object.
      */
-    public function calculateAction(Request $request, Response $response)
+    public function calculateAction(Request $request, Response $response) : Response
     {
         $query = $request->getParsedBody();
         $placeholders = [];
@@ -154,6 +165,7 @@ class Index
                 $operator = $this->operators->findOperatorBySymbol($query['operator']);
                 $placeholders['%OPERATOR%'] = $query['operator'];
                 $placeholders['%OPERATORNAME%'] = $operator->getOperatorName();
+                $placeholders['%SYMBOLNAME%'] = $operator->getSymbol()->getSymbolName();
             } catch (UnrecognisedOperator $e) {
                 // we could pass back the operator, but without validation, we daren't.
                 $errors[] = 'Unrecognised operator';
@@ -163,13 +175,59 @@ class Index
         if (count($errors) > 0) {
             $errorString = implode('<br>', $errors);
             $placeholders['%ERRORS%'] = $errorString;
-            $this->showEntryPage($request, $response, $placeholders);
+            return $this->showEntryPage($request, $response, $placeholders);
+
         }
 
-        // do the calculation
-        $placeholders['%SHOWENTRY%'] = $this->renderShowEntry($placeholders);
-        $placeholders['%RESULT%'] = (string)$operator->performCalculation($first, $second);
-        $rendered = $this->renderView('results', $placeholders);
-        $response->addToBody($rendered);
+        // do the calculation (if there are no errors)
+        if (count($errors) === 0) {
+            try {
+                // set our own error handler to check things.
+                set_error_handler(function () {
+                    throw new \ArithmeticError('Bad sum');
+                });
+                $placeholders['%RESULT%'] = (string)$operator->performCalculation($first, $second);
+            } catch (\ArithmeticError $e) {
+                $errors[] = 'Unable to calculate - arithmetic error: ' . $e->getMessage();
+            } catch (UnrecognisedOperator $e) {
+                $errors[] = 'Unable to calculate - invalid operator';
+            }
+        }
+        // handle errors
+        if (count($errors) > 0) {
+            $errorString = implode('<br>', $errors);
+            $placeholders['%ERRORS%'] = $errorString;
+            return $this->showEntryPage($request, $response, $placeholders);
+
+        }
+        // compose the JSON
+        if (true===$request->isJson()) {
+            $response=new Response('application/json;charset=utf-8');
+            $placeholders['%SHOWENTRY%']='';
+            $placeholders['htmlResults']= $this->renderView('results', $placeholders);
+            $placeholders=$this->jsonifyPlaceholders($placeholders);
+
+            $response->addToBody(json_encode($placeholders));
+        } else {
+            // if not, do the HTML
+            $placeholders['%SHOWENTRY%'] = $this->renderShowEntry($placeholders);
+            $rendered = $this->renderView('results', $placeholders);
+            $response->addToBody($rendered);
+        }
+        return $response;
+    }
+
+    /**
+     * Make the placeholders JSON friendly.
+     * @param array $placeholders
+     * @return array
+     */
+    private function jsonifyPlaceholders(array $placeholders) : array {
+        $newPlaceholders=[];
+        foreach ($placeholders as $name=>$value) {
+            $name=strtolower(str_replace('%','',$name));
+            $newPlaceholders[$name]=$value;
+        }
+        return $newPlaceholders;
     }
 }

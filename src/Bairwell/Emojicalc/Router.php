@@ -51,12 +51,34 @@ class Router
         $this->routes[$method][$route] = $callable;
     }
 
+    /**
+     * Run the routes.
+     */
     public function run()
     {
         $request = new Request();
-        $request->method = strtoupper($this->environment['REQUEST_METHOD'] ?? '[Unknown]');
-        $request->withParsedBody($_POST);
+        $request->withMethod(strtoupper($this->environment['REQUEST_METHOD'] ?? '[Unknown]'));
+
         $request->withQueryParams($_GET);
+        // set the content type
+        $request->withContentType($this->environment['CONTENT_TYPE'] ?? 'text/html');
+        // check if we have inbound json
+        if (0 === strpos($request->getContentType(), 'application/json')) {
+            $request->setJson(true);
+            // read in the JSON
+            $input=file_get_contents('php://input');
+            $json=json_decode($input,true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $request->withParsedBody($json);
+            } else {
+                header('HTTP/1.1 500 Internal Server Error');
+                $page = $this->renderView('500internalServer', ['%DEBUG%' => 'Invalid JSON']);
+                echo $page;
+                return;
+            }
+        } else {
+            $request->withParsedBody($_POST);
+        }
         $requestUri = '';
         if (true === isset($this->environment['REQUEST_URI'])) {
             $requestUri = parse_url($this->environment['REQUEST_URI'], PHP_URL_PATH);
@@ -65,8 +87,8 @@ class Router
         $found = false;
         $matches = [];
         // now to match the routes
-        if (true === array_key_exists($request->method, $this->routes)) {
-            $keys = array_keys($this->routes[$request->method]);
+        if (true === array_key_exists($request->getMethod(), $this->routes)) {
+            $keys = array_keys($this->routes[$request->getMethod()]);
             foreach ($keys as $routePath) {
                 if (1 === preg_match($routePath, $requestUri, $matches)) {
                     $found = $routePath;
@@ -81,7 +103,7 @@ class Router
         // we do this in a try/catch block as other exceptions may be raised.
         try {
             if (false !== $found) {
-                $this->runFoundRoute($request, $this->routes[$request->method][$found]);
+                $this->runFoundRoute($request, $this->routes[$request->getMethod()][$found]);
             } else {
                 header('HTTP/1.1 404 Not Found');
                 $page = $this->renderView('404notFound');
@@ -99,13 +121,18 @@ class Router
      *
      * @param Request $request The input request item in case data is needed.
      * @param callable $route The route we are running.
+     * @throws \Exception If the route doesn't return a response object.
      */
     protected function runFoundRoute(Request $request, callable $route)
     {
         $response = new Response();
         // ensure all output is captured.
         ob_start();
-        $route($request, $response);
+        /* @var Response $response */
+        $response=$route($request, $response);
+        if (false===($response instanceof Response)) {
+            throw new \Exception('Invalid response from route');
+        }
         // append any outputted text to the body "just in case"
         $response->addToBody(ob_get_contents());
         ob_end_clean();
