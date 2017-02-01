@@ -1,0 +1,12 @@
+# Composer template
+composer.phar
+/vendor/
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+
+# Vagrant file
+.vagrant
