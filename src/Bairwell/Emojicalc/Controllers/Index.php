@@ -64,6 +64,7 @@ class Index
         // compose the JSON
         if (true===$request->isJson()) {
             $response=new Response('application/json;charset=utf-8');
+            $placeholders = $this->getShowEntryPlaceholders($placeholders);
             $placeholders=$this->jsonifyPlaceholders($placeholders);
 
             return $response->addToBody(json_encode($placeholders));

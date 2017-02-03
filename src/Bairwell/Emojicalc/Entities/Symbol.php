@@ -53,6 +53,10 @@ class Symbol
         return $this->symbolCode;
     }
 
+    /**
+     * Gets the name of the symbol
+     * @return string
+     */
     public function getSymbolName() : string {
         return $this->symbolName;
     }
