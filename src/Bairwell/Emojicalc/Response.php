@@ -8,7 +8,7 @@ namespace Bairwell\Emojicalc;
  *
  * Basic "inspired by" PSR 7 style response object, but massively massively simplified.
  */
-class Response
+class Response implements ResponseInterface
 {
     /**
      * Content type.
@@ -46,9 +46,9 @@ class Response
      * Sets the http content type.
      *
      * @param string $contentType
-     * @return Response Return self to be fluent.
+     * @return ResponseInterface Return self to be fluent.
      */
-    public function setContentType(string $contentType): self
+    public function setContentType(string $contentType): ResponseInterface
     {
         $this->contentType = $contentType;
         return $this;
@@ -68,9 +68,9 @@ class Response
      * Add a string to the body.
      *
      * @param string $string String to add.
-     * @return self To be fluent.
+     * @return ResponseInterface To be fluent.
      */
-    public function addToBody(string $string): self
+    public function addToBody(string $string): ResponseInterface
     {
         $this->body .= $string;
         return $this;

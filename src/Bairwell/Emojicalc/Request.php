@@ -8,7 +8,7 @@ namespace Bairwell\Emojicalc;
  *
  * Basic "inspired by" PSR 7 style request object, but massively simplified.
  */
-class Request
+class Request implements RequestInterface
 {
 
     /**
@@ -57,9 +57,10 @@ class Request
     /**
      * Set the content type.
      * @param string $contentType New content type.
-     * @return Request
+     * @return RequestInterface
      */
-    public function withContentType(string $contentType) : self {
+    public function withContentType(string $contentType) : RequestInterface
+    {
         $this->contentType=$contentType;
         return $this;
     }
@@ -71,12 +72,14 @@ class Request
     public function getContentType() : string {
         return $this->contentType;
     }
+
     /**
      * Set the status of the is json request flag.
      * @param bool $isJson Is this a json request or not.
-     * @return Request
+     * @return RequestInterface
      */
-    public function setJson(bool $isJson) : self {
+    public function setJson(bool $isJson) : RequestInterface
+    {
         $this->isJson=$isJson;
         return $this;
     }
@@ -100,9 +103,10 @@ class Request
      * Return an instance with the provided HTTP method.
      *
      * @param string $method Method to set.
-     * @return Request
+     * @return RequestInterface
      */
-    public function withMethod(string $method) : self {
+    public function withMethod(string $method) : RequestInterface
+    {
         $this->method=$method;
         return $this;
     }
@@ -119,9 +123,9 @@ class Request
     /**
      * Set the parsed data.
      * @param array $data The input data.
-     * @return Request Self to be fluent.
+     * @return RequestInterface Self to be fluent.
      */
-    public function withParsedBody(array $data): self
+    public function withParsedBody(array $data): RequestInterface
     {
         $this->postData = $data;
         return $this;
@@ -131,9 +135,9 @@ class Request
      * Return an instance with the specified query string parameters.
      *
      * @param array $query
-     * @return Request
+     * @return RequestInterface
      */
-    public function withQueryParams(array $query): self
+    public function withQueryParams(array $query): RequestInterface
     {
         $this->queryParameters = $query;
         return $this;

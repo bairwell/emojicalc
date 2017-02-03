@@ -119,16 +119,16 @@ class Router
     /**
      * Run the found route.
      *
-     * @param Request $request The input request item in case data is needed.
+     * @param RequestInterface $request The input request item in case data is needed.
      * @param callable $route The route we are running.
      * @throws \Exception If the route doesn't return a response object.
      */
-    protected function runFoundRoute(Request $request, callable $route)
+    protected function runFoundRoute(RequestInterface $request, callable $route)
     {
         $response = new Response();
         // ensure all output is captured.
         ob_start();
-        /* @var Response $response */
+        /* @var ResponseInterface $response */
         $response=$route($request, $response);
         if (false===($response instanceof Response)) {
             throw new \Exception('Invalid response from route');

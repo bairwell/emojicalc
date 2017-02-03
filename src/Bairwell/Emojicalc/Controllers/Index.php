@@ -7,7 +7,9 @@ use Bairwell\Emojicalc\Entities\Operators;
 use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
 use Bairwell\Emojicalc\RenderViewTrait;
 use Bairwell\Emojicalc\Request;
+use Bairwell\Emojicalc\RequestInterface;
 use Bairwell\Emojicalc\Response;
+use Bairwell\Emojicalc\ResponseInterface;
 
 /**
  * Class Index Controller.
@@ -41,12 +43,12 @@ class Index
      *
      * Just a public "proxy" for the renderStartPage function.
      *
-     * @param Request $request The request object (unused here).
-     * @param Response $response The response object for populating.
+     * @param RequestInterface $request The request object (unused here).
+     * @param ResponseInterface $response The response object for populating.
      * @throws \Exception If the views do not exist.
-     * @return Response For chaining.
+     * @return ResponseInterface For chaining.
      */
-    public function startAction(Request $request, Response $response) : Response
+    public function startAction(RequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
         return $this->showEntryPage($request, $response);
     }
@@ -54,12 +56,12 @@ class Index
     /**
      * Actually outputs the start/entry page, but allows parameters to be passed in.
      *
-     * @param Request $request The request object (unused here).
-     * @param Response $response The response object for populating.
+     * @param RequestInterface $request The request object (unused here).
+     * @param ResponseInterface $response The response object for populating.
      * @param array $placeholders Additional placeholders.
-     * @return Response For chaining.
+     * @return ResponseInterface For chaining.
      */
-    private function showEntryPage(Request $request, Response $response, array $placeholders = []) : Response
+    private function showEntryPage(RequestInterface $request, ResponseInterface $response, array $placeholders = []) : ResponseInterface
     {
         // compose the JSON
         if (true===$request->isJson()) {
@@ -123,11 +125,11 @@ class Index
     /**
      * Do the calculations.
      *
-     * @param Request $request The inbound request object.
-     * @param Response $response The response object.
-     * @return Response Populated response object.
+     * @param RequestInterface $request The inbound request object.
+     * @param ResponseInterface $response The response object.
+     * @return ResponseInterface Populated response object.
      */
-    public function calculateAction(Request $request, Response $response) : Response
+    public function calculateAction(RequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
         $query = $request->getParsedBody();
         $placeholders = [];
@@ -142,7 +144,7 @@ class Index
         } else {
             $first = filter_var($query['first'], FILTER_VALIDATE_FLOAT);
             if (false === $first) {
-                $errors[] = 'First number must be an integer';
+                $errors[] = 'First number must be a float (decimal)';
             } else {
                 $placeholders['%FIRST%'] = $first;
             }
@@ -153,7 +155,7 @@ class Index
         } else {
             $second = filter_var($query['second'], FILTER_VALIDATE_FLOAT);
             if (false === $second) {
-                $errors[] = 'Second number must be an integer';
+                $errors[] = 'Second number must be a float (decimal)';
             } else {
                 $placeholders['%SECOND%'] = $second;
             }
@@ -164,7 +166,7 @@ class Index
         } else {
             try {
                 $operator = $this->operators->findOperatorBySymbol($query['operator']);
-                $placeholders['%OPERATOR%'] = $query['operator'];
+                $placeholders['%OPERATOR%'] = $operator->getSymbol()->getSymbolCode();
                 $placeholders['%OPERATORNAME%'] = $operator->getOperatorName();
                 $placeholders['%SYMBOLNAME%'] = $operator->getSymbol()->getSymbolName();
             } catch (UnrecognisedOperator $e) {

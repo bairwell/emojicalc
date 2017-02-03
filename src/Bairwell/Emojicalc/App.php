@@ -70,10 +70,10 @@ class App
     protected function buildDefaultOperators(): Operators
     {
         $operators = (new Operators())
-            ->addOperator(new Operator('+', new Symbol("\u{1f47d}", 'Alien')))
-            ->addOperator(new Operator('-', new Symbol("\u{1f480}", 'Skull')))
-            ->addOperator(new Operator('*', new Symbol("\u{1f47b}", 'Ghost')))
-            ->addOperator(new Operator('/', new Symbol("\u{1f631}", 'Scream'))
+            ->addOperator(new Operator\Addition(new Symbol("\u{1f47d}", 'Alien')))
+            ->addOperator(new Operator\Subtraction(new Symbol("\u{1f480}", 'Skull')))
+            ->addOperator(new Operator\Multiply(new Symbol("\u{1f47b}", 'Ghost')))
+            ->addOperator(new Operator\Division(new Symbol("\u{1f631}", 'Scream'))
             );
         return $operators;
     }
