@@ -3,14 +3,13 @@ declare(strict_types=1);
 
 namespace Bairwell\Emojicalc\Entities;
 
-use Bairwell\Emojicalc\Entities\Symbol;
-
 /**
  * Base class for operators to extend.
  *
  * @package Bairwell\Emojicalc\Entities
  */
-abstract class Operator {
+abstract class Operator
+{
 
     /**
      * Private as the child classes don't need to know about it.
@@ -25,12 +24,13 @@ abstract class Operator {
      *
      * @param Symbol $symbol
      */
-    final public function __construct(Symbol $symbol) {
-        $this->symbol=$symbol;
+    final public function __construct(Symbol $symbol)
+    {
+        $this->symbol = $symbol;
     }
+
     /**
      * Get the associated symbol.
-
      * Final as there is no reason for child classes to know about symbols.
      *
      * @return Symbol
@@ -46,6 +46,7 @@ abstract class Operator {
      * @return string
      */
     abstract public function getOperatorType(): string;
+
     /**
      * Get the name of this operator.
      *

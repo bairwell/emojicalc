@@ -29,15 +29,25 @@ class App
     protected $configuration;
 
     /**
+     * Views renderer.
+     *
+     * @var RenderViewInterface
+     */
+    protected $renderViews;
+
+    /**
      * Basic App constructor.
      *
      * @param array $configuration Configuration details (to be used instead of default).
      * @param array $environment Environment details (overrides _SERVER) for testing.
+     * @throws \InvalidArgumentException If configuration is invalid.
      */
     public function __construct(array $configuration = [], array $environment = [])
     {
         $this->configuration = $this->buildConfiguration($configuration);
-        $this->router = new Router($environment);
+        $this->renderViews = new RenderView($this->configuration['views']);
+
+        $this->router = new Router($environment, $this->renderViews);
     }
 
     /**
@@ -50,7 +60,9 @@ class App
     protected function buildConfiguration(array $configuration): array
     {
         // any default configurations
-        $defaultConfiguration = [];
+        $defaultConfiguration = [
+            'views' => __DIR__ . DIRECTORY_SEPARATOR . 'Views' . DIRECTORY_SEPARATOR
+        ];
         // only build the operators if they aren't already set. why call the classes
         // unnecessarily?
         if (false === isset($configuration['operators'])) {
@@ -84,7 +96,7 @@ class App
     public function run()
     {
         // should really use dependency injection/containers here.
-        $indexController = new Index($this->configuration['operators']);
+        $indexController = new Index($this->configuration['operators'], $this->renderViews);
         $this->router->registerRoute('GET', '/^\/?$/', [$indexController, 'startAction']);
         $this->router->registerRoute('POST', '/^\/?$/', [$indexController, 'calculateAction']);
         $this->router->run();

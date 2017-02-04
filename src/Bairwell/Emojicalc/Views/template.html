@@ -50,10 +50,10 @@
     %BODY%
 </div>
 <script>
-    jQuery("#entryForm" ).submit(function( event ) {
-        var entryForm=jQuery('#entryForm');
+    jQuery("#entryForm").submit(function (event) {
+        var entryForm = jQuery('#entryForm');
         var data = {};
-        jQuery.each(this.elements, function(i, v){
+        jQuery.each(this.elements, function (i, v) {
             var input = jQuery(v);
             data[input.attr("name")] = input.val();
             delete data["undefined"];
@@ -65,20 +65,20 @@
             dataType: 'json',
             contentType: 'application/json;charset=utf-8',
             data: JSON.stringify(data),
-            async:false,
-            success: function(data) {
-                var resultField=jQuery('#jQueryResults');
-                var errorField=jQuery('#errors');
-                if (data.hasOwnProperty('result')){
-                    console.log('The result was '+data.result);
+            async: false,
+            success: function (data) {
+                var resultField = jQuery('#jQueryResults');
+                var errorField = jQuery('#errors');
+                if (data.hasOwnProperty('result')) {
+                    console.log('The result was ' + data.result);
                 }
-                if (data.hasOwnProperty('htmlresults')){
+                if (data.hasOwnProperty('htmlresults')) {
                     resultField.html(data.htmlresults);
                     resultField.show();
                 } else {
                     resultField.hide();
                 }
-                if (data.hasOwnProperty('errors')){
+                if (data.hasOwnProperty('errors')) {
                     errorField.html(data.errors);
                     errorField.show();
                 } else {

@@ -9,7 +9,6 @@ namespace Bairwell\Emojicalc;
  */
 class Router
 {
-    use RenderViewTrait;
 
     /**
      * The environment details.
@@ -25,17 +24,26 @@ class Router
     protected $routes = [];
 
     /**
+     * Our render view object.
+     *
+     * @var RenderViewInterface
+     */
+    protected $renderView;
+
+    /**
      * Router constructor.
      *
      * @param array $environment Allow override $_SERVER settings for testing.
+     * @param RenderViewInterface $renderView The view rendering system.
      */
-    public function __construct(array $environment = [])
+    public function __construct(array $environment = [], RenderViewInterface $renderView)
     {
         if (true === empty($environment)) {
             $environment = $_SERVER;
         }
 
         $this->environment = $environment;
+        $this->renderView = $renderView;
     }
 
     /**
@@ -66,13 +74,13 @@ class Router
         if (0 === strpos($request->getContentType(), 'application/json')) {
             $request->setJson(true);
             // read in the JSON
-            $input=file_get_contents('php://input');
-            $json=json_decode($input,true);
+            $input = file_get_contents('php://input');
+            $json = json_decode($input, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 $request->withParsedBody($json);
             } else {
                 header('HTTP/1.1 500 Internal Server Error');
-                $page = $this->renderView('500internalServer', ['%DEBUG%' => 'Invalid JSON']);
+                $page = $this->renderView->renderView('500internalServer', ['%DEBUG%' => 'Invalid JSON']);
                 echo $page;
                 return;
             }
@@ -97,8 +105,8 @@ class Router
             }
         }
 
-        $request->url = $requestUri;
-        $request->pathParameters = $matches;
+        $request->withUri($requestUri);
+        $request->withPathParameters($matches);
         // now to run it if we found it.
         // we do this in a try/catch block as other exceptions may be raised.
         try {
@@ -106,12 +114,12 @@ class Router
                 $this->runFoundRoute($request, $this->routes[$request->getMethod()][$found]);
             } else {
                 header('HTTP/1.1 404 Not Found');
-                $page = $this->renderView('404notFound');
+                $page = $this->renderView->renderView('404notFound');
                 echo $page;
             }//end if
         } catch (\Throwable $e) {
             header('HTTP/1.1 500 Internal Server Error');
-            $page = $this->renderView('500internalServer', ['%DEBUG%' => $e->getMessage()]);
+            $page = $this->renderView->renderView('500internalServer', ['%DEBUG%' => $e->getMessage()]);
             echo $page;
         }
     }
@@ -129,8 +137,8 @@ class Router
         // ensure all output is captured.
         ob_start();
         /* @var ResponseInterface $response */
-        $response=$route($request, $response);
-        if (false===($response instanceof Response)) {
+        $response = $route($request, $response);
+        if (false === ($response instanceof Response)) {
             throw new \Exception('Invalid response from route');
         }
         // append any outputted text to the body "just in case"
@@ -140,7 +148,7 @@ class Router
         // if it is html, then render it in the template
         if (0 === strpos($response->getContentType(), 'text/html')) {
             $templateParameters = ['%BODY%' => $response->getBody()];
-            $page = $this->renderView('template', $templateParameters);
+            $page = $this->renderView->renderView('template', $templateParameters);
             echo $page;
         } else {
             // if it isn't html, then just output it "as is".

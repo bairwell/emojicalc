@@ -6,11 +6,9 @@ namespace Bairwell\Emojicalc;
 /**
  * Renders a view file.
  *
- * It's set a trait as I want to be able to reuse it to render parts of the controller.
- *
  * @package Bairwell\Emojicalc
  */
-trait RenderViewTrait
+class RenderView implements RenderViewInterface
 {
 
     /**
@@ -18,6 +16,21 @@ trait RenderViewTrait
      * @var array
      */
     private $cachedTemplates;
+
+    /**
+     * Location of the views files.
+     * @var string
+     */
+    private $viewsLocation;
+
+    /**
+     * RenderView constructor.
+     * @param string $viewsLocation
+     */
+    public function __construct(string $viewsLocation)
+    {
+        $this->viewsLocation = $viewsLocation;
+    }
 
     /**
      * Renders a view file.
@@ -29,9 +42,9 @@ trait RenderViewTrait
      *
      * @throws \InvalidArgumentException If file does not exist.
      */
-    protected function renderView(string $fileName, array $parameters = []): string
+    public function renderView(string $fileName, array $parameters = []): string
     {
-        $fileName = __DIR__ . DIRECTORY_SEPARATOR . 'Views' . DIRECTORY_SEPARATOR . $fileName . '.html';
+        $fileName = $this->viewsLocation . $fileName . '.html';
         $real = realpath($fileName);
         if (false === $real) {
             throw new \InvalidArgumentException('File ' . $fileName . ' does not exist');

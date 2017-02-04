@@ -33,7 +33,7 @@ class Symbol
     /**
      * Symbol constructor.
      *
-     * @param string $symbolCode The unicode code for the symbol (or similiar). i.e. "\u{1f47d}".
+     * @param string $symbolCode The unicode code for the symbol (or similar). i.e. "\u{1f47d}".
      * @param string $symbolName Name of the symbol (such as "alien").
      * @param string $symbolImage Additional URL for the graphic for the symbol.
      */
@@ -48,7 +48,7 @@ class Symbol
      * Get this symbol code.
      * @return string
      */
-    public function getSymbolCode() : string
+    public function getSymbolCode(): string
     {
         return $this->symbolCode;
     }
@@ -57,7 +57,8 @@ class Symbol
      * Gets the name of the symbol
      * @return string
      */
-    public function getSymbolName() : string {
+    public function getSymbolName(): string
+    {
         return $this->symbolName;
     }
 }

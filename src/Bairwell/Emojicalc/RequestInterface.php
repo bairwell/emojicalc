@@ -77,4 +77,30 @@ interface RequestInterface
      * @return array
      */
     public function getQueryParams(): array;
+
+    /**
+     * Get the uri.
+     * @return string
+     */
+    public function getUri(): string;
+
+    /**
+     * Set the uri.
+     * @param string $uri
+     * @return RequestInterface
+     */
+    public function withUri(string $uri): RequestInterface;
+
+    /**
+     * Set the path parameters.
+     * @param array $parameters
+     * @return RequestInterface
+     */
+    public function withPathParameters(array $parameters): RequestInterface;
+
+    /**
+     * Get the path parameters.
+     * @return array
+     */
+    public function getPathParameters(): array;
 }

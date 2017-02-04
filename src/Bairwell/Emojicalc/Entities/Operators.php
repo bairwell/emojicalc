@@ -40,13 +40,15 @@ class Operators implements \Iterator
      *
      * Currently allows multiple operators with the same operator and/or same symbol.
      *
-     * @TODO Add duplicate checking.
-     *
      * @param Operator $operator Operator to add.
      * @return $this Fluent interface.
+     * @throws \InvalidArgumentException If operator is duplicated.
      */
     public function addOperator(Operator $operator)
     {
+        if (true === in_array($operator, $this->operators, true)) {
+            throw new \InvalidArgumentException('Duplicated operator');
+        }
         $this->operators[] = $operator;
         return $this;
     }
@@ -55,7 +57,7 @@ class Operators implements \Iterator
      * Find an operator by type (i.e. the +/- symbols)
      * @param string $type The operator type to match.
      * @return Operator The matched operator.
-     * @throws \Exception If not found.
+     * @throws UnrecognisedOperator If not found.
      */
     public function findOperatorByType(string $type): Operator
     {
@@ -72,7 +74,7 @@ class Operators implements \Iterator
      * Find an operator by symbol code (i.e. the \u234)
      * @param string $symbolCode The symbol code to match.
      * @return Operator The matched operator.
-     * @throws \Exception If not found.
+     * @throws UnrecognisedOperator If not found.
      */
     public function findOperatorBySymbol(string $symbolCode): Operator
     {
@@ -91,7 +93,7 @@ class Operators implements \Iterator
      * @return Operator
      * @since 5.0.0
      */
-    public function current()
+    public function current(): Operator
     {
         return $this->operators[$this->position];
     }
@@ -113,7 +115,7 @@ class Operators implements \Iterator
      * @return mixed scalar on success, or null on failure.
      * @since 5.0.0
      */
-    public function key()
+    public function key(): int
     {
         return $this->position;
     }
@@ -125,7 +127,7 @@ class Operators implements \Iterator
      * Returns true on success or false on failure.
      * @since 5.0.0
      */
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->operators[$this->position]);
     }

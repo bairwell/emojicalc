@@ -9,7 +9,8 @@ use Bairwell\Emojicalc\Entities\Operator;
  * Subtraction operator.
  * @package Bairwell\Emojicalc\Entities\Operator
  */
-class Subtraction extends Operator {
+class Subtraction extends Operator
+{
     /**
      * Get the operator type.
      *
@@ -38,7 +39,7 @@ class Subtraction extends Operator {
      */
     public function performCalculation(float $first, float $second): float
     {
-        return $first-$second;
+        return $first - $second;
     }
 
 

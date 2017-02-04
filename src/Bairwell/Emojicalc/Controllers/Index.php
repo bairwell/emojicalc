@@ -5,8 +5,7 @@ namespace Bairwell\Emojicalc\Controllers;
 
 use Bairwell\Emojicalc\Entities\Operators;
 use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
-use Bairwell\Emojicalc\RenderViewTrait;
-use Bairwell\Emojicalc\Request;
+use Bairwell\Emojicalc\RenderViewInterface;
 use Bairwell\Emojicalc\RequestInterface;
 use Bairwell\Emojicalc\Response;
 use Bairwell\Emojicalc\ResponseInterface;
@@ -21,8 +20,11 @@ use Bairwell\Emojicalc\ResponseInterface;
 class Index
 {
 
-    use RenderViewTrait;
-
+    /**
+     * Render view
+     * @var RenderViewInterface
+     */
+    protected $renderView;
     /**
      * List of all valid operators.
      * @var Operators
@@ -32,10 +34,12 @@ class Index
     /**
      * Index constructor.
      * @param Operators $operators List of valid operators.
+     * @param RenderViewInterface $renderView The view rendering system.
      */
-    public function __construct(Operators $operators)
+    public function __construct(Operators $operators, RenderViewInterface $renderView)
     {
         $this->operators = $operators;
+        $this->renderView = $renderView;
     }
 
     /**
@@ -48,7 +52,7 @@ class Index
      * @throws \Exception If the views do not exist.
      * @return ResponseInterface For chaining.
      */
-    public function startAction(RequestInterface $request, ResponseInterface $response) : ResponseInterface
+    public function startAction(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         return $this->showEntryPage($request, $response);
     }
@@ -61,13 +65,16 @@ class Index
      * @param array $placeholders Additional placeholders.
      * @return ResponseInterface For chaining.
      */
-    private function showEntryPage(RequestInterface $request, ResponseInterface $response, array $placeholders = []) : ResponseInterface
-    {
+    private function showEntryPage(
+        RequestInterface $request,
+        ResponseInterface $response,
+        array $placeholders = []
+    ): ResponseInterface {
         // compose the JSON
-        if (true===$request->isJson()) {
-            $response=new Response('application/json;charset=utf-8');
+        if (true === $request->isJson()) {
+            $response = new Response('application/json;charset=utf-8');
             $placeholders = $this->getShowEntryPlaceholders($placeholders);
-            $placeholders=$this->jsonifyPlaceholders($placeholders);
+            $placeholders = $this->jsonifyPlaceholders($placeholders);
 
             return $response->addToBody(json_encode($placeholders));
         } else {
@@ -76,22 +83,9 @@ class Index
     }
 
     /**
-     * Actually renders and then returns the show entry page.
-     * @param array $placeholders Additional placeholders.
-     * @return string The rendered start page.
-     * @throws \Exception If the views do not exist.
-     */
-    private function renderShowEntry(array $placeholders = []): string
-    {
-        $placeholders = $this->getShowEntryPlaceholders($placeholders);
-        return $this->renderView('showEntry', $placeholders);
-    }
-
-    /**
      * Set all the necessary placeholders for rendering the show entry page.
      * @param array $placeholders Any existing placeholders.
      * @return array Populated placeholders array.
-     * @throws \Exception If the views do not exist.
      */
     private function getShowEntryPlaceholders(array $placeholders = []): array
     {
@@ -110,7 +104,7 @@ class Index
             if ($currentOperator->getSymbol()->getSymbolCode() === $placeholders['%OPERATOR%']) {
                 $selected = 'selected=\'selected\'';
             }
-            $htmlOperators .= $this->renderView('operatorOption',
+            $htmlOperators .= $this->renderView->renderView('operatorOption',
                 [
                     '%OPERATORTYPE%' => $currentOperator->getOperatorType(),
                     '%SYMBOL%' => $currentOperator->getSymbol()->getSymbolCode(),
@@ -123,13 +117,40 @@ class Index
     }
 
     /**
+     * Make the placeholders JSON friendly.
+     * @param array $placeholders
+     * @return array
+     */
+    private function jsonifyPlaceholders(array $placeholders): array
+    {
+        $newPlaceholders = [];
+        foreach ($placeholders as $name => $value) {
+            $name = strtolower(str_replace('%', '', $name));
+            $newPlaceholders[$name] = $value;
+        }
+        return $newPlaceholders;
+    }
+
+    /**
+     * Actually renders and then returns the show entry page.
+     * @param array $placeholders Additional placeholders.
+     * @return string The rendered start page.
+     * @throws \Exception If the views do not exist.
+     */
+    private function renderShowEntry(array $placeholders = []): string
+    {
+        $placeholders = $this->getShowEntryPlaceholders($placeholders);
+        return $this->renderView->renderView('showEntry', $placeholders);
+    }
+
+    /**
      * Do the calculations.
      *
      * @param RequestInterface $request The inbound request object.
      * @param ResponseInterface $response The response object.
      * @return ResponseInterface Populated response object.
      */
-    public function calculateAction(RequestInterface $request, ResponseInterface $response) : ResponseInterface
+    public function calculateAction(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $query = $request->getParsedBody();
         $placeholders = [];
@@ -194,6 +215,8 @@ class Index
                 $errors[] = 'Unable to calculate - arithmetic error: ' . $e->getMessage();
             } catch (UnrecognisedOperator $e) {
                 $errors[] = 'Unable to calculate - invalid operator';
+            } finally {
+                restore_error_handler();
             }
         }
         // handle errors
@@ -204,33 +227,19 @@ class Index
 
         }
         // compose the JSON
-        if (true===$request->isJson()) {
-            $response=new Response('application/json;charset=utf-8');
-            $placeholders['%SHOWENTRY%']='';
-            $placeholders['htmlResults']= $this->renderView('results', $placeholders);
-            $placeholders=$this->jsonifyPlaceholders($placeholders);
+        if (true === $request->isJson()) {
+            $response = new Response('application/json;charset=utf-8');
+            $placeholders['%SHOWENTRY%'] = '';
+            $placeholders['htmlResults'] = $this->renderView->renderView('results', $placeholders);
+            $placeholders = $this->jsonifyPlaceholders($placeholders);
 
             $response->addToBody(json_encode($placeholders));
         } else {
             // if not, do the HTML
             $placeholders['%SHOWENTRY%'] = $this->renderShowEntry($placeholders);
-            $rendered = $this->renderView('results', $placeholders);
+            $rendered = $this->renderView->renderView('results', $placeholders);
             $response->addToBody($rendered);
         }
         return $response;
-    }
-
-    /**
-     * Make the placeholders JSON friendly.
-     * @param array $placeholders
-     * @return array
-     */
-    private function jsonifyPlaceholders(array $placeholders) : array {
-        $newPlaceholders=[];
-        foreach ($placeholders as $name=>$value) {
-            $name=strtolower(str_replace('%','',$name));
-            $newPlaceholders[$name]=$value;
-        }
-        return $newPlaceholders;
     }
 }

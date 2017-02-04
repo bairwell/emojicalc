@@ -9,7 +9,8 @@ use Bairwell\Emojicalc\Entities\Operator;
  * Division operator.
  * @package Bairwell\Emojicalc\Entities\Operator
  */
-class Division extends Operator {
+class Division extends Operator
+{
     /**
      * Get the operator type.
      *
@@ -35,10 +36,14 @@ class Division extends Operator {
      * @param float $first The first number.
      * @param float $second The second number.
      * @return float Return value.
+     * @throws \DivisionByZeroError If an attempt to divide by zero if made
      */
     public function performCalculation(float $first, float $second): float
     {
-        return $first/$second;
+        if ((float)0 === $second) {
+            throw new \DivisionByZeroError('Cannot divide by zero');
+        }
+        return $first / $second;
     }
 
 

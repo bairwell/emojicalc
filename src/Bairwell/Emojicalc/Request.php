@@ -15,19 +15,19 @@ class Request implements RequestInterface
      * Holds the URL.
      * @var string
      */
-    public $url='';
+    protected $url = '';
 
     /**
      * Holds the path parameters.
      * @var array
      */
-    public $pathParameters=[];
+    protected $pathParameters = [];
     /**
      * Request method.
      *
      * @var string
      */
-    protected $method='';
+    protected $method = '';
     /**
      * Query string parameters.
      *
@@ -46,22 +46,22 @@ class Request implements RequestInterface
      * Stores if this is a json request or not.
      * @var bool
      */
-    protected $isJson=false;
+    protected $isJson = false;
 
     /**
      * Stores the content type.
      * @var string
      */
-    protected $contentType='text/html';
+    protected $contentType = 'text/html';
 
     /**
      * Set the content type.
      * @param string $contentType New content type.
      * @return RequestInterface
      */
-    public function withContentType(string $contentType) : RequestInterface
+    public function withContentType(string $contentType): RequestInterface
     {
-        $this->contentType=$contentType;
+        $this->contentType = $contentType;
         return $this;
     }
 
@@ -69,7 +69,8 @@ class Request implements RequestInterface
      * Get the set content type.
      * @return string
      */
-    public function getContentType() : string {
+    public function getContentType(): string
+    {
         return $this->contentType;
     }
 
@@ -78,9 +79,9 @@ class Request implements RequestInterface
      * @param bool $isJson Is this a json request or not.
      * @return RequestInterface
      */
-    public function setJson(bool $isJson) : RequestInterface
+    public function setJson(bool $isJson): RequestInterface
     {
-        $this->isJson=$isJson;
+        $this->isJson = $isJson;
         return $this;
     }
 
@@ -88,14 +89,17 @@ class Request implements RequestInterface
      * Is this a JSON request?
      * @return bool
      */
-    public function isJson() : bool {
+    public function isJson(): bool
+    {
         return $this->isJson;
     }
+
     /**
      * Return the request method.
      * @return string
      */
-    public function getMethod() : string {
+    public function getMethod(): string
+    {
         return $this->method;
     }
 
@@ -105,11 +109,12 @@ class Request implements RequestInterface
      * @param string $method Method to set.
      * @return RequestInterface
      */
-    public function withMethod(string $method) : RequestInterface
+    public function withMethod(string $method): RequestInterface
     {
-        $this->method=$method;
+        $this->method = $method;
         return $this;
     }
+
     /**
      * Get the parsed data.
      *
@@ -152,4 +157,43 @@ class Request implements RequestInterface
         return $this->queryParameters;
     }
 
+    /**
+     * Get the uri.
+     * @return string
+     */
+    public function getUri(): string
+    {
+        return $this->url;
+    }
+
+    /**
+     * Set the uri.
+     * @param string $uri
+     * @return RequestInterface
+     */
+    public function withUri(string $uri): RequestInterface
+    {
+        $this->url = $uri;
+        return $this;
+    }
+
+    /**
+     * Set the path parameters.
+     * @param array $parameters
+     * @return RequestInterface
+     */
+    public function withPathParameters(array $parameters): RequestInterface
+    {
+        $this->pathParameters = $parameters;
+        return $this;
+    }
+
+    /**
+     * Get the path parameters.
+     * @return array
+     */
+    public function getPathParameters(): array
+    {
+        return $this->pathParameters;
+    }
 }//end class
