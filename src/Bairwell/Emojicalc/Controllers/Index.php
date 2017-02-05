@@ -17,7 +17,7 @@ use Bairwell\Emojicalc\ResponseInterface;
  *
  * @package Bairwell\Emojicalc\Controllers
  */
-class Index
+class Index implements IndexInterface
 {
 
     /**
@@ -228,7 +228,7 @@ class Index
         }
         // compose the JSON
         if (true === $request->isJson()) {
-            $response = new Response('application/json;charset=utf-8');
+            $response->reset('application/json;charset=utf-8');
             $placeholders['%SHOWENTRY%'] = '';
             $placeholders['htmlResults'] = $this->renderView->renderView('results', $placeholders);
             $placeholders = $this->jsonifyPlaceholders($placeholders);

@@ -38,4 +38,10 @@ interface ResponseInterface
      * @return ResponseInterface
      */
     public function addToBody(string $string): ResponseInterface;
+
+    /**
+     * Reset the response.
+     * @param string $contentType
+     */
+    public function reset(string $contentType = 'text/html;charset=utf-8');
 }

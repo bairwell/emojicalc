@@ -44,15 +44,15 @@ class RenderView implements RenderViewInterface
      */
     public function renderView(string $fileName, array $parameters = []): string
     {
-        $fileName = $this->viewsLocation . $fileName . '.html';
-        $real = realpath($fileName);
-        if (false === $real) {
-            throw new \InvalidArgumentException('File ' . $fileName . ' does not exist');
+        if (false === isset($this->cachedTemplates[$fileName])) {
+            $fullFileName = $this->viewsLocation . $fileName . '.html';
+            $real = realpath($fullFileName);
+            if (false === $real) {
+                throw new \InvalidArgumentException('File ' . $fullFileName . ' does not exist');
+            }
+            $this->cachedTemplates[$fileName] = file_get_contents($real);
         }
-        if (false === isset($this->cachedTemplates[$real])) {
-            $this->cachedTemplates[$real] = file_get_contents($real);
-        }
-        return strtr($this->cachedTemplates[$real], $parameters);
+        return strtr($this->cachedTemplates[$fileName], $parameters);
 
     }
 }

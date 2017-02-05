@@ -29,6 +29,15 @@ class Response implements ResponseInterface
      */
     public function __construct(string $contentType = 'text/html;charset=utf-8')
     {
+        $this->reset($contentType);
+    }
+
+    /**
+     * Reset the response.
+     * @param string $contentType
+     */
+    public function reset(string $contentType = 'text/html;charset=utf-8')
+    {
         $this->body = '';
         $this->setContentType($contentType);
     }

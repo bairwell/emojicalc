@@ -7,7 +7,7 @@ namespace Bairwell\Emojicalc;
  * A very basic router.
  * @package Bairwell\Emojicalc
  */
-class Router
+class Router implements RouterInterface
 {
 
     /**
@@ -60,56 +60,65 @@ class Router
     }
 
     /**
+     * Checks and returns true if any routes are defined.
+     * @return bool
+     */
+    public function areRoutesDefined(): bool
+    {
+        return (!empty($this->routes));
+    }
+
+    /**
      * Run the routes.
      */
     public function run()
     {
-        $request = new Request();
-        $request->withMethod(strtoupper($this->environment['REQUEST_METHOD'] ?? '[Unknown]'));
-
-        $request->withQueryParams($_GET);
-        // set the content type
-        $request->withContentType($this->environment['CONTENT_TYPE'] ?? 'text/html');
-        // check if we have inbound json
-        if (0 === strpos($request->getContentType(), 'application/json')) {
-            $request->setJson(true);
-            // read in the JSON
-            $input = file_get_contents('php://input');
-            $json = json_decode($input, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $request->withParsedBody($json);
-            } else {
-                header('HTTP/1.1 500 Internal Server Error');
-                $page = $this->renderView->renderView('500internalServer', ['%DEBUG%' => 'Invalid JSON']);
-                echo $page;
-                return;
-            }
-        } else {
-            $request->withParsedBody($_POST);
-        }
-        $requestUri = '';
-        if (true === isset($this->environment['REQUEST_URI'])) {
-            $requestUri = parse_url($this->environment['REQUEST_URI'], PHP_URL_PATH);
-        }
-        $requestUri = trim($requestUri, '/');
-        $found = false;
-        $matches = [];
-        // now to match the routes
-        if (true === array_key_exists($request->getMethod(), $this->routes)) {
-            $keys = array_keys($this->routes[$request->getMethod()]);
-            foreach ($keys as $routePath) {
-                if (1 === preg_match($routePath, $requestUri, $matches)) {
-                    $found = $routePath;
-                    break;
-                }
-            }
-        }
-
-        $request->withUri($requestUri);
-        $request->withPathParameters($matches);
-        // now to run it if we found it.
         // we do this in a try/catch block as other exceptions may be raised.
         try {
+            $request = new Request();
+            $request->withMethod(strtoupper($this->environment['REQUEST_METHOD'] ?? '[Unknown]'));
+
+            $request->withQueryParams($_GET);
+            // set the content type
+            $request->withContentType($this->environment['CONTENT_TYPE'] ?? 'text/html');
+            // check if we have inbound json
+            if (0 === strpos($request->getContentType(), 'application/json')) {
+                $request->setJson(true);
+                // read in the JSON
+                $input = file_get_contents('php://input');
+                $json = json_decode($input, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $request->withParsedBody($json);
+                } else {
+                    header('HTTP/1.1 500 Internal Server Error');
+                    $page = $this->renderView->renderView('500internalServer', ['%DEBUG%' => 'Invalid JSON']);
+                    echo $page;
+                    return;
+                }
+            } else {
+                $request->withParsedBody($_POST);
+            }
+            $requestUri = '';
+            if (true === isset($this->environment['REQUEST_URI'])) {
+                $requestUri = parse_url($this->environment['REQUEST_URI'], PHP_URL_PATH);
+            }
+            $requestUri = trim($requestUri, '/');
+            $found = false;
+            $matches = [];
+            // now to match the routes
+            if (true === array_key_exists($request->getMethod(), $this->routes)) {
+                $keys = array_keys($this->routes[$request->getMethod()]);
+                foreach ($keys as $routePath) {
+                    if (1 === preg_match($routePath, $requestUri, $matches)) {
+                        $found = $routePath;
+                        break;
+                    }
+                }
+            }
+
+            $request->withUri($requestUri);
+            $request->withPathParameters($matches);
+            // now to run it if we found it.
             if (false !== $found) {
                 $this->runFoundRoute($request, $this->routes[$request->getMethod()][$found]);
             } else {
@@ -139,7 +148,7 @@ class Router
         /* @var ResponseInterface $response */
         $response = $route($request, $response);
         if (false === ($response instanceof Response)) {
-            throw new \Exception('Invalid response from route');
+            throw new \RuntimeException('Invalid response from route');
         }
         // append any outputted text to the body "just in case"
         $response->addToBody(ob_get_contents());
