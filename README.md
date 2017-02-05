@@ -1,5 +1,10 @@
 This is an "EmojiCalculator" written by Richard Bairwell
 
+Composer is only used in development environment for unit testing using PHPUnit 6.
+
+At the time of writing, the code is 69.87% unit tested by lines, 93.33% by classes - only
+the App.php file is currently untested.
+
 Vagrant based startup
 =====================
 The [Vagrant](https://vagrantup.com) install is based on [the PHP7 dev box](https://github.com/rlerdorf/php7dev) , but has been
