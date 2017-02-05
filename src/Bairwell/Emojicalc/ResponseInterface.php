@@ -11,6 +11,12 @@ namespace Bairwell\Emojicalc;
 interface ResponseInterface
 {
     /**
+     * Response constructor.
+     * @param string $contentType The content type we are returning.
+     */
+    public function __construct(string $contentType = 'text/html;charset=utf-8');
+
+    /**
      * Gets the content type.
      * @return string
      */

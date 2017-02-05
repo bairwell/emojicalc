@@ -11,13 +11,6 @@ class Router implements RouterInterface
 {
 
     /**
-     * The environment details.
-     *
-     * @var array
-     */
-    protected $environment;
-
-    /**
      * Our list of known routes.
      * @var array
      */
@@ -31,19 +24,55 @@ class Router implements RouterInterface
     protected $renderView;
 
     /**
+     * The request object.
+     *
+     * @var RequestInterface
+     */
+    protected $request;
+
+    /**
+     * The response object.
+     *
+     * @var ResponseInterface
+     */
+    protected $response;
+
+    /**
      * Router constructor.
      *
-     * @param array $environment Allow override $_SERVER settings for testing.
+     * @param RequestInterface $request The request.
+     * @param ResponseInterface $response The response.
      * @param RenderViewInterface $renderView The view rendering system.
      */
-    public function __construct(array $environment = [], RenderViewInterface $renderView)
+    public function __construct(RequestInterface $request, ResponseInterface $response, RenderViewInterface $renderView)
     {
-        if (true === empty($environment)) {
-            $environment = $_SERVER;
-        }
-
-        $this->environment = $environment;
+        $this->request = $request;
+        $this->response = $response;
         $this->renderView = $renderView;
+    }
+
+    /**
+     * Get all current configured routes. Only really useful for testing.
+     * @return array
+     */
+    public function getAllRoutes(): array
+    {
+        return $this->routes;
+    }
+
+    /**
+     * Returns all routes for a method. Only really useful for testing.
+     * @param string $method The route we are asking about.
+     * @return array
+     */
+    public function getAllRoutesForMethod(string $method): array
+    {
+        $method = strtoupper($method);
+        if (true === isset($this->routes[$method])) {
+            return $this->routes[$method];
+        } else {
+            return [];
+        }
     }
 
     /**
@@ -52,11 +81,13 @@ class Router implements RouterInterface
      * @param string $method The method we will be matching against.
      * @param string $route The URL we we be matching against.
      * @param callable $callable The callable route.
+     * @returns RouterInterface To be fluent
      */
-    public function registerRoute(string $method, string $route, callable $callable)
+    public function registerRoute(string $method, string $route, callable $callable): RouterInterface
     {
         $method = strtoupper($method);
         $this->routes[$method][$route] = $callable;
+        return $this;
     }
 
     /**
@@ -69,65 +100,54 @@ class Router implements RouterInterface
     }
 
     /**
+     * Finds a matching route.
+     *
+     * @param string $method HTTP Method.
+     * @param string $url URL to match against.
+     * @param array $matches Returns a list of matches of the path parameter.
+     * @return false|callable
+     */
+    public function findMatchingRoute(string $method, string $url, array &$matches = [])
+    {
+        $url = parse_url($url, PHP_URL_PATH);
+        $url = trim($url, '/');
+        $method = strtoupper($method);
+        $found = false;
+        // now to match the routes
+        if (true === array_key_exists($method, $this->routes)) {
+            $keys = array_keys($this->routes[$method]);
+            foreach ($keys as $routePath) {
+                if (1 === preg_match($routePath, $url, $matches)) {
+                    $found = $this->routes[$method][$routePath];
+                    break;
+                }
+            }
+        }
+        return $found;
+    }
+
+    /**
      * Run the routes.
      */
     public function run()
     {
+        $matches = [];
+        $found = $this->findMatchingRoute($this->request->getMethod(), $this->request->getUri(), $matches);
+        if (false !== $found) {
+            $this->request->withPathParameters($matches);
+        }
         // we do this in a try/catch block as other exceptions may be raised.
         try {
-            $request = new Request();
-            $request->withMethod(strtoupper($this->environment['REQUEST_METHOD'] ?? '[Unknown]'));
-
-            $request->withQueryParams($_GET);
-            // set the content type
-            $request->withContentType($this->environment['CONTENT_TYPE'] ?? 'text/html');
-            // check if we have inbound json
-            if (0 === strpos($request->getContentType(), 'application/json')) {
-                $request->setJson(true);
-                // read in the JSON
-                $input = file_get_contents('php://input');
-                $json = json_decode($input, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $request->withParsedBody($json);
-                } else {
-                    header('HTTP/1.1 500 Internal Server Error');
-                    $page = $this->renderView->renderView('500internalServer', ['%DEBUG%' => 'Invalid JSON']);
-                    echo $page;
-                    return;
-                }
-            } else {
-                $request->withParsedBody($_POST);
-            }
-            $requestUri = '';
-            if (true === isset($this->environment['REQUEST_URI'])) {
-                $requestUri = parse_url($this->environment['REQUEST_URI'], PHP_URL_PATH);
-            }
-            $requestUri = trim($requestUri, '/');
-            $found = false;
-            $matches = [];
-            // now to match the routes
-            if (true === array_key_exists($request->getMethod(), $this->routes)) {
-                $keys = array_keys($this->routes[$request->getMethod()]);
-                foreach ($keys as $routePath) {
-                    if (1 === preg_match($routePath, $requestUri, $matches)) {
-                        $found = $routePath;
-                        break;
-                    }
-                }
-            }
-
-            $request->withUri($requestUri);
-            $request->withPathParameters($matches);
             // now to run it if we found it.
             if (false !== $found) {
-                $this->runFoundRoute($request, $this->routes[$request->getMethod()][$found]);
+                $this->runFoundRoute($found);
             } else {
-                header('HTTP/1.1 404 Not Found');
+                header('HTTP/1.1 404 Not Found',true,404);
                 $page = $this->renderView->renderView('404notFound');
                 echo $page;
             }//end if
         } catch (\Throwable $e) {
-            header('HTTP/1.1 500 Internal Server Error');
+            header('HTTP/1.1 500 Internal Server Error',true,500);
             $page = $this->renderView->renderView('500internalServer', ['%DEBUG%' => $e->getMessage()]);
             echo $page;
         }
@@ -136,19 +156,25 @@ class Router implements RouterInterface
     /**
      * Run the found route.
      *
-     * @param RequestInterface $request The input request item in case data is needed.
      * @param callable $route The route we are running.
      * @throws \Exception If the route doesn't return a response object.
+     * @throws \Throwable If the route throws an exception.
      */
-    protected function runFoundRoute(RequestInterface $request, callable $route)
+    protected function runFoundRoute(callable $route)
     {
-        $response = new Response();
         // ensure all output is captured.
+        $start=ob_get_level();
         ob_start();
-        /* @var ResponseInterface $response */
-        $response = $route($request, $response);
-        if (false === ($response instanceof Response)) {
-            throw new \RuntimeException('Invalid response from route');
+        try {
+            /* @var ResponseInterface $response */
+            $response = $route($this->request, $this->response);
+            if (false === ($response instanceof ResponseInterface)) {
+                throw new \RuntimeException('Invalid response from route.');
+            }
+        } catch (\Throwable $e) {
+            // if there is an exception in the route, end the buffer.
+            ob_end_clean();
+            throw $e;
         }
         // append any outputted text to the body "just in case"
         $response->addToBody(ob_get_contents());

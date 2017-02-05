@@ -25,23 +25,15 @@ class Symbol
     private $symbolCode;
 
     /**
-     * Additional URL for the graphic for the symbol.
-     * @var string
-     */
-    private $symbolImage;
-
-    /**
      * Symbol constructor.
      *
      * @param string $symbolCode The unicode code for the symbol (or similar). i.e. "\u{1f47d}".
      * @param string $symbolName Name of the symbol (such as "alien").
-     * @param string $symbolImage Additional URL for the graphic for the symbol.
      */
-    public function __construct(string $symbolCode, string $symbolName = '', string $symbolImage = '')
+    public function __construct(string $symbolCode, string $symbolName = '')
     {
         $this->symbolCode = $symbolCode;
         $this->symbolName = $symbolName;
-        $this->symbolImage = $symbolImage;
     }
 
     /**

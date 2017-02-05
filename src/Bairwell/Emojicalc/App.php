@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Bairwell\Emojicalc;
 
+use Bairwell\Emojicalc\Controllers\About;
+use Bairwell\Emojicalc\Controllers\AboutController;
+use Bairwell\Emojicalc\Controllers\AboutInterface;
 use Bairwell\Emojicalc\Controllers\ControllerInterface;
 use Bairwell\Emojicalc\Controllers\Index;
 use Bairwell\Emojicalc\Controllers\IndexInterface;
@@ -28,26 +31,37 @@ class App
      * Basic App constructor.
      *
      * @param ContainerInterface $container Container/configuration details (to be used instead of default).
-     * @param array $environment Environment details (overrides _SERVER) for testing.
      * @throws \InvalidArgumentException If configuration is invalid.
      */
-    public function __construct(ContainerInterface $container = null, array $environment = [])
+    public function __construct(ContainerInterface $container = null)
     {
         if (null === $container) {
             $container = new Container();
         }
         $this->container = $container;
-        $this->populateContainer($environment);
+
+        $this->populateContainer();
     }
 
     /**
      * Build the basic configuration taking into account any default settings.
-     *
-     * @throws \InvalidArgumentException If the list of operators is not an Operator instance.
-     * @param array $environment Environment details (overrides _SERVER) for testing.
      */
-    protected function populateContainer(array $environment)
+    protected function populateContainer()
     {
+        if (false === $this->container->has('environment')) {
+            $this->container['environment'] = $_SERVER;
+        }
+        if (false === $this->container->has('post')) {
+            $this->container['post'] = $_POST;
+        }
+        if (false === $this->container->has('get')) {
+            $this->container['get'] = $_GET;
+        }
+        if (false === $this->container->has('phpinput')) {
+            $this->container['phpinput'] = function (): string {
+                return file_get_contents('php://input');
+            };
+        }
         $this->checkAndBuildDefaultViews();
         // only build the operators if they aren't already set. why call the classes
         // unnecessarily?
@@ -57,9 +71,14 @@ class App
         if (false === ($this->container->get('operators') instanceof Operators)) {
             throw new \InvalidArgumentException('Invalid operators');
         }
+        $this->checkAndBuildRequestResponse();
         // now check the router
         if (false === $this->container->has('router')) {
-            $this->container['router'] = new Router($environment, $this->container->get('renderViews'));
+            $this->container['router'] = new Router(
+                $this->container->get('request'),
+                $this->container->get('response'),
+                $this->container->get('renderViews')
+            );
         }
         if (false === ($this->container->get('router') instanceof RouterInterface)) {
             throw new \InvalidArgumentException('Invalid router');
@@ -111,6 +130,30 @@ class App
     }
 
     /**
+     * Check and build the request item.
+     */
+    protected function checkAndBuildRequestResponse()
+    {
+        if (false === $this->container->has('request')) {
+            $this->container['request'] = new Request(
+                $this->container->get('environment'),
+                $this->container->get('get'),
+                $this->container->get('post'),
+                $this->container->get('phpinput')
+            );
+        }
+        if (false === ($this->container->get('request') instanceof RequestInterface)) {
+            throw new \InvalidArgumentException('Invalid request');
+        }
+        if (false === $this->container->has('response')) {
+            $this->container['response'] = new Response();
+        }
+        if (false === ($this->container->get('response') instanceof ResponseInterface)) {
+            throw new \InvalidArgumentException('Invalid response');
+        }
+    }
+
+    /**
      * Setup the default routes.
      * @throws \InvalidArgumentException If indexController does not support indexInterface.
      */
@@ -126,10 +169,22 @@ class App
             if (false === ($this->container->get('indexController') instanceof IndexInterface)) {
                 throw new \InvalidArgumentException('Invalid IndexController');
             }
+            if (false === $this->container->has('aboutController')) {
+                $this->container['aboutController'] = new About($this->container->get('renderViews'));
+            }
+            if (false === ($this->container->get('aboutController') instanceof AboutInterface)) {
+                throw new \InvalidArgumentException('Invalid aboutController');
+            }
             $this->container->get('router')->registerRoute('GET', '/^\/?$/',
                 [$this->container->get('indexController'), 'startAction']);
             $this->container->get('router')->registerRoute('POST', '/^\/?$/',
                 [$this->container->get('indexController'), 'calculateAction']);
+            $this->container->get('router')->registerRoute('GET', '/^author\/?$/',
+                [$this->container->get('aboutController'), 'authorAction']);
+            $this->container->get('router')->registerRoute('GET', '/^specification\/?$/',
+                [$this->container->get('aboutController'), 'specificationAction']);
+            $this->container->get('router')->registerRoute('GET', '/^licence\/?$/',
+                [$this->container->get('aboutController'), 'licenceAction']);
         }
     }
 

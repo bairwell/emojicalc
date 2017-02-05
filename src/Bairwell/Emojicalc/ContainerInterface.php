@@ -7,7 +7,7 @@ namespace Bairwell\Emojicalc;
  * Simple PSR-11 inspired container.
  * @package Bairwell\Emojicalc
  */
-interface ContainerInterface
+interface ContainerInterface extends \ArrayAccess
 {
     /**
      * Get an item from the container store.
@@ -35,6 +35,7 @@ interface ContainerInterface
      * <p>
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
+     * @throws \RuntimeException If used.
      */
     public function offsetExists($offset);
 
@@ -46,6 +47,7 @@ interface ContainerInterface
      * </p>
      * @return mixed Can return all value types.
      * @since 5.0.0
+     * @throws \RuntimeException If used.
      */
     public function offsetGet($offset);
 

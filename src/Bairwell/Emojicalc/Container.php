@@ -7,7 +7,7 @@ namespace Bairwell\Emojicalc;
  * Simple PSR-11 inspired container.
  * @package Bairwell\Emojicalc
  */
-class Container implements \ArrayAccess, ContainerInterface
+class Container implements ContainerInterface
 {
 
     /**
@@ -33,7 +33,7 @@ class Container implements \ArrayAccess, ContainerInterface
     public function get(string $id)
     {
         if (false === $this->has($id)) {
-            throw new \RuntimeException('No entry was found for "' . $id . '" identifier');
+            throw new \RuntimeException('No entry was found for "' . $id . '" identifier.');
         }
         return $this->store[$id];
     }
@@ -59,25 +59,24 @@ class Container implements \ArrayAccess, ContainerInterface
      * <p>
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
+     * @throws \RuntimeException If used.
      */
     public function offsetExists($offset)
     {
-        return $this->has($offset);
+        throw new \RuntimeException('offsetExists on containers cannot be used directly. Use "has".');
     }
 
     /**
      * Offset to retrieve
      * @link http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param mixed $offset <p>
-     * The offset to retrieve.
-     * </p>
+     * @param mixed $offset The offset to retrieve.
      * @return mixed Can return all value types.
      * @since 5.0.0
      * @throws \RuntimeException If used.
      */
     public function offsetGet($offset)
     {
-        throw new \RuntimeException('offsetGet on containers cannot be used directly. Use "get"');
+        throw new \RuntimeException('offsetGet on containers cannot be used directly. Use "get".');
     }
 
     /**

@@ -7,7 +7,6 @@ use Bairwell\Emojicalc\Entities\Operators;
 use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
 use Bairwell\Emojicalc\RenderViewInterface;
 use Bairwell\Emojicalc\RequestInterface;
-use Bairwell\Emojicalc\Response;
 use Bairwell\Emojicalc\ResponseInterface;
 
 /**
@@ -72,13 +71,15 @@ class Index implements IndexInterface
     ): ResponseInterface {
         // compose the JSON
         if (true === $request->isJson()) {
-            $response = new Response('application/json;charset=utf-8');
+            $response->reset('application/json;charset=utf-8');
             $placeholders = $this->getShowEntryPlaceholders($placeholders);
             $placeholders = $this->jsonifyPlaceholders($placeholders);
 
-            return $response->addToBody(json_encode($placeholders));
+            $response->addToBody(json_encode($placeholders));
+            return $response;
         } else {
-            return $response->addToBody($this->renderShowEntry($placeholders));
+            $response->addToBody($this->renderShowEntry($placeholders));
+            return $response;
         }
     }
 
@@ -187,12 +188,14 @@ class Index implements IndexInterface
         } else {
             try {
                 $operator = $this->operators->findOperatorBySymbol($query['operator']);
-                $placeholders['%OPERATOR%'] = $operator->getSymbol()->getSymbolCode();
-                $placeholders['%OPERATORNAME%'] = $operator->getOperatorName();
-                $placeholders['%SYMBOLNAME%'] = $operator->getSymbol()->getSymbolName();
             } catch (UnrecognisedOperator $e) {
                 // we could pass back the operator, but without validation, we daren't.
                 $errors[] = 'Unrecognised operator';
+            }
+            if (null !== $operator) {
+                $placeholders['%OPERATOR%'] = $operator->getSymbol()->getSymbolCode();
+                $placeholders['%OPERATORNAME%'] = $operator->getOperatorName();
+                $placeholders['%SYMBOLNAME%'] = $operator->getSymbol()->getSymbolName();
             }
         }
         // handle if we have an error
