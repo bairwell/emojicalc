@@ -393,7 +393,7 @@ class RouterTest extends TestCase
     {
         $renderView = $this->getRenderView();
         $request = $this->getRequestWithProtocolAndPath('GET', 'hello');
-        $response = $this->getResponseWithContentType('text/html');
+        $response = $this->getResponseWithContentType('text/html;charset=testRunHtml');
         $sut = new Router($request, $response, $renderView);
         $firstRoute = function ($request, ResponseInterface $response): ResponseInterface {
             $response->addToBody('hello');
@@ -404,7 +404,7 @@ class RouterTest extends TestCase
         $line = '{"viewData:template":{"%BODY%":"hello"}}';
         $this->expectOutputString($line);
         $this->assertSame(1, count(self::$headers));
-        $this->assertSame('Content-type: text/html;charset=utf-8', self::$headers[0]['s']);
+        $this->assertSame('Content-type: text/html;charset=testRunHtml', self::$headers[0]['s']);
         $this->assertSame(true, self::$headers[0]['r']);
         $this->assertSame(null, self::$headers[0]['c']);
     }

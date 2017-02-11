@@ -43,7 +43,7 @@ class Container implements ContainerInterface
      * @param string $id Id of the item.
      * @return bool
      */
-    public function has(string $id)
+    public function has(string $id) : bool
     {
         return array_key_exists($id, $this->store);
     }
@@ -61,7 +61,7 @@ class Container implements ContainerInterface
      * @since 5.0.0
      * @throws \RuntimeException If used.
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset) : bool
     {
         throw new \RuntimeException('offsetExists on containers cannot be used directly. Use "has".');
     }

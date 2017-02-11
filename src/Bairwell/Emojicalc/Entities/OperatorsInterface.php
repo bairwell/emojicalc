@@ -1,9 +1,9 @@
 <?php
-declare(strict_types=1);
 
 namespace Bairwell\Emojicalc\Entities;
 
 use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
+
 
 /**
  * Class Operators.
@@ -13,27 +13,12 @@ use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
  *
  * @package Bairwell\Emojicalc\Entities
  */
-class Operators implements OperatorsInterface
+interface OperatorsInterface extends \Iterator
 {
-    /**
-     * Our list of operators.
-     * @var array
-     */
-    private $operators = [];
-
-    /**
-     * Current iterator position.
-     * @var int
-     */
-    private $position;
-
     /**
      * Operators constructor.
      */
-    public function __construct()
-    {
-        $this->position = 0;
-    }
+    public function __construct();
 
     /**
      * Add a single operator.
@@ -44,14 +29,7 @@ class Operators implements OperatorsInterface
      * @return $this Fluent interface.
      * @throws \InvalidArgumentException If operator is duplicated.
      */
-    public function addOperator(Operator $operator)
-    {
-        if (true === in_array($operator, $this->operators, true)) {
-            throw new \InvalidArgumentException('Duplicated operator');
-        }
-        $this->operators[] = $operator;
-        return $this;
-    }
+    public function addOperator(Operator $operator);
 
     /**
      * Find an operator by type (i.e. the +/- symbols)
@@ -59,16 +37,7 @@ class Operators implements OperatorsInterface
      * @return Operator The matched operator.
      * @throws UnrecognisedOperator If not found.
      */
-    public function findOperatorByType(string $type): Operator
-    {
-        /* @var Operator $currentOperator */
-        foreach ($this->operators as $currentOperator) {
-            if ($currentOperator->getOperatorType() === $type) {
-                return $currentOperator;
-            }
-        }
-        throw new UnrecognisedOperator($type);
-    }
+    public function findOperatorByType(string $type): Operator;
 
     /**
      * Find an operator by symbol code (i.e. the \u234)
@@ -76,16 +45,7 @@ class Operators implements OperatorsInterface
      * @return Operator The matched operator.
      * @throws UnrecognisedOperator If not found.
      */
-    public function findOperatorBySymbol(string $symbolCode): Operator
-    {
-        /* @var Operator $currentOperator */
-        foreach ($this->operators as $currentOperator) {
-            if ($currentOperator->getSymbol()->getSymbolCode() === $symbolCode) {
-                return $currentOperator;
-            }
-        }
-        throw new UnrecognisedOperator($symbolCode);
-    }
+    public function findOperatorBySymbol(string $symbolCode): Operator;
 
     /**
      * Return the current element
@@ -93,10 +53,7 @@ class Operators implements OperatorsInterface
      * @return Operator
      * @since 5.0.0
      */
-    public function current(): Operator
-    {
-        return $this->operators[$this->position];
-    }
+    public function current(): Operator;
 
     /**
      * Move forward to next element
@@ -104,10 +61,7 @@ class Operators implements OperatorsInterface
      * @return void Any returned value is ignored.
      * @since 5.0.0
      */
-    public function next()
-    {
-        ++$this->position;
-    }
+    public function next();
 
     /**
      * Return the key of the current element
@@ -115,10 +69,7 @@ class Operators implements OperatorsInterface
      * @return mixed scalar on success, or null on failure.
      * @since 5.0.0
      */
-    public function key(): int
-    {
-        return $this->position;
-    }
+    public function key(): int;
 
     /**
      * Checks if current position is valid
@@ -127,10 +78,7 @@ class Operators implements OperatorsInterface
      * Returns true on success or false on failure.
      * @since 5.0.0
      */
-    public function valid(): bool
-    {
-        return isset($this->operators[$this->position]);
-    }
+    public function valid(): bool;
 
     /**
      * Rewind the Iterator to the first element
@@ -138,9 +86,5 @@ class Operators implements OperatorsInterface
      * @return void Any returned value is ignored.
      * @since 5.0.0
      */
-    public function rewind()
-    {
-        $this->position = 0;
-    }
-
+    public function rewind();
 }

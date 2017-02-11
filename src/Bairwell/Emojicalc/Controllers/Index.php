@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Bairwell\Emojicalc\Controllers;
 
 use Bairwell\Emojicalc\Entities\Operators;
+use Bairwell\Emojicalc\Entities\OperatorsInterface;
 use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
 use Bairwell\Emojicalc\RenderViewInterface;
 use Bairwell\Emojicalc\RequestInterface;
@@ -26,16 +27,16 @@ class Index implements IndexInterface
     protected $renderView;
     /**
      * List of all valid operators.
-     * @var Operators
+     * @var OperatorsInterface
      */
     private $operators;
 
     /**
      * Index constructor.
-     * @param Operators $operators List of valid operators.
+     * @param OperatorsInterface $operators List of valid operators.
      * @param RenderViewInterface $renderView The view rendering system.
      */
-    public function __construct(Operators $operators, RenderViewInterface $renderView)
+    public function __construct(OperatorsInterface $operators, RenderViewInterface $renderView)
     {
         $this->operators = $operators;
         $this->renderView = $renderView;

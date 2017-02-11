@@ -4,6 +4,7 @@ namespace Bairwell\Emojicalc\Controllers;
 
 use Bairwell\Emojicalc\Entities\Operator;
 use Bairwell\Emojicalc\Entities\Operators;
+use Bairwell\Emojicalc\Entities\OperatorsInterface;
 use Bairwell\Emojicalc\Entities\Symbol;
 use Bairwell\Emojicalc\Exceptions\UnrecognisedOperator;
 use Bairwell\Emojicalc\RenderViewInterface;
@@ -100,9 +101,9 @@ class IndexTest extends TestCase
      * Build our list of test operators.
      *
      * @coversNothing
-     * @return Operators
+     * @return OperatorsInterface
      */
-    protected function getOperators(): Operators
+    protected function getOperators(): OperatorsInterface
     {
         // first
         $first = $this->getFirstOperator();

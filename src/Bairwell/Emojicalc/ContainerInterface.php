@@ -22,7 +22,7 @@ interface ContainerInterface extends \ArrayAccess
      * @param string $id Id of the item.
      * @return bool
      */
-    public function has(string $id);
+    public function has(string $id) : bool;
 
     /**
      * Whether a offset exists
@@ -37,7 +37,7 @@ interface ContainerInterface extends \ArrayAccess
      * @since 5.0.0
      * @throws \RuntimeException If used.
      */
-    public function offsetExists($offset);
+    public function offsetExists($offset) : bool;
 
     /**
      * Offset to retrieve

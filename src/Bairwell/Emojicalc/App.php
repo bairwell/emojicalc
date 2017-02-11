@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace Bairwell\Emojicalc;
 
 use Bairwell\Emojicalc\Controllers\About;
-use Bairwell\Emojicalc\Controllers\AboutController;
 use Bairwell\Emojicalc\Controllers\AboutInterface;
 use Bairwell\Emojicalc\Controllers\ControllerInterface;
 use Bairwell\Emojicalc\Controllers\Index;
 use Bairwell\Emojicalc\Controllers\IndexInterface;
 use Bairwell\Emojicalc\Entities\Operator;
 use Bairwell\Emojicalc\Entities\Operators;
+use Bairwell\Emojicalc\Entities\OperatorsInterface;
 use Bairwell\Emojicalc\Entities\Symbol;
 
 /**
@@ -45,6 +45,7 @@ class App
 
     /**
      * Build the basic configuration taking into account any default settings.
+     * @throws \InvalidArgumentException If operators/router are not valid interfaces.
      */
     protected function populateContainer()
     {
@@ -69,8 +70,9 @@ class App
             $this->container['operators'] = $this->buildDefaultOperators();
         }
         if (false === ($this->container->get('operators') instanceof Operators)) {
-            throw new \InvalidArgumentException('Invalid operators');
+            throw new \InvalidArgumentException('Invalid operators.');
         }
+        $this->checkAndBuildRequestRequest();
         $this->checkAndBuildRequestResponse();
         // now check the router
         if (false === $this->container->has('router')) {
@@ -81,7 +83,7 @@ class App
             );
         }
         if (false === ($this->container->get('router') instanceof RouterInterface)) {
-            throw new \InvalidArgumentException('Invalid router');
+            throw new \InvalidArgumentException('Invalid router.');
         }
         $this->checkAndBuildDefaultRouting();
     }
@@ -101,24 +103,24 @@ class App
                 $this->container['views'] = __DIR__ . DIRECTORY_SEPARATOR . 'Views' . DIRECTORY_SEPARATOR;
             }
             if (false === is_string($this->container->get('views'))) {
-                throw new \InvalidArgumentException('Invalid views path: should be a string');
+                throw new \InvalidArgumentException('Invalid views path: should be a string.');
             }
             if (false === realpath($this->container->get('views'))) {
-                throw new \InvalidArgumentException('Invalid views path: not real');
+                throw new \InvalidArgumentException('Invalid views path: not real.');
             }
             $this->container['renderViews'] = new RenderView($this->container->get('views'));
         }
         if (false === ($this->container->get('renderViews') instanceof RenderViewInterface)) {
-            throw new \InvalidArgumentException('Invalid renderViews');
+            throw new \InvalidArgumentException('Invalid renderViews.');
         }
     }
 
     /**
      * Build the list of default operators.
-     * @return Operators
+     * @return OperatorsInterface
      * @throws \InvalidArgumentException If it isn't a recognised operator type being passed in.
      */
-    protected function buildDefaultOperators(): Operators
+    protected function buildDefaultOperators(): OperatorsInterface
     {
         $operators = (new Operators())
             ->addOperator(new Operator\Addition(new Symbol("\u{1f47d}", 'Alien')))
@@ -131,8 +133,9 @@ class App
 
     /**
      * Check and build the request item.
+     * @throws \InvalidArgumentException If the request is not a request interface.
      */
-    protected function checkAndBuildRequestResponse()
+    protected function checkAndBuildRequestRequest()
     {
         if (false === $this->container->has('request')) {
             $this->container['request'] = new Request(
@@ -143,13 +146,20 @@ class App
             );
         }
         if (false === ($this->container->get('request') instanceof RequestInterface)) {
-            throw new \InvalidArgumentException('Invalid request');
+            throw new \InvalidArgumentException('Invalid request.');
         }
+    }
+    /**
+     * Check and build the request item.
+     * @throws \InvalidArgumentException If the response is not a response interface.
+     */
+    protected function checkAndBuildRequestResponse()
+    {
         if (false === $this->container->has('response')) {
             $this->container['response'] = new Response();
         }
         if (false === ($this->container->get('response') instanceof ResponseInterface)) {
-            throw new \InvalidArgumentException('Invalid response');
+            throw new \InvalidArgumentException('Invalid response.');
         }
     }
 
@@ -167,13 +177,13 @@ class App
                     $this->container->get('renderViews'));
             }
             if (false === ($this->container->get('indexController') instanceof IndexInterface)) {
-                throw new \InvalidArgumentException('Invalid IndexController');
+                throw new \InvalidArgumentException('Invalid IndexController.');
             }
             if (false === $this->container->has('aboutController')) {
                 $this->container['aboutController'] = new About($this->container->get('renderViews'));
             }
             if (false === ($this->container->get('aboutController') instanceof AboutInterface)) {
-                throw new \InvalidArgumentException('Invalid aboutController');
+                throw new \InvalidArgumentException('Invalid aboutController.');
             }
             $this->container->get('router')->registerRoute('GET', '/^\/?$/',
                 [$this->container->get('indexController'), 'startAction']);
@@ -190,9 +200,9 @@ class App
 
     /**
      * Return the container.
-     * @return ControllerInterface
+     * @return ContainerInterface
      */
-    public function getContainer(): ControllerInterface
+    public function getContainer(): ContainerInterface
     {
         return $this->container;
     }
